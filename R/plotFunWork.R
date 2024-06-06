@@ -61,7 +61,7 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
   if (add) {
     if (ndims == 1) {
       rlang::check_installed("latticeExtra")
-      return(plot + latticeExtra::layer(do.call(panel.plotFun1,
+      return(plot + latticeExtra::layer(do.call(usafacalc.panel.plotFun1,
                                                 c(list(..f.. = fList, npts = npts, discontinuity = discontinuity,
                                                        discontinuities = discontinuities, filled = filled,
                                                        levels = levels, nlevels = nlevels, surface = surface,
@@ -70,7 +70,7 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
                                         data = as.list(environment()), ..., under = under))
     }
     rlang::check_installed("latticeExtra")
-    return(plot + latticeExtra::layer(do.call(panel.plotFun,
+    return(plot + latticeExtra::layer(do.call(usafacalc.panel.plotFun,
                                               c(list(object = object, npts = npts, discontinuity = discontinuity,
                                                      discontinuities = discontinuities, filled = filled,
                                                      levels = levels, nlevels = nlevels, suface = surface,
@@ -206,7 +206,7 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
         if (is.null(at))
           at = pretty(z, ncontours)
         argsToPass <- list(z ~ x * y, at = at, xlab = xlab,
-                           ylab = ylab, panel = panel.levelcontourplot,
+                           ylab = ylab, panel = usafacalc.panel.levelcontourplot,
                            groups = substitute(groups), col.regions = col.regions(60),
                            contour = contours, labels = labels, colorkey = FALSE,
                            retion = TRUE, filled = filled, ...)
@@ -221,7 +221,7 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
         nlevels <- 2
       }
       if (add) {
-        return(ladd(panel.levelcontourplot(grid$Var1,
+        return(ladd(usafacalc.panel.levelcontourplot(grid$Var1,
                                            grid$Var2, grid$height, subscripts = 1, at = levels,
                                            labels = labels, filled = filled, groups = eval(substitute(groups),
                                                                                            localData), col.regions = col.regions, contour = TRUE,
@@ -299,7 +299,7 @@ branch_lengths <- function(x, y, discontinuities = NULL, discontinuity = 1) {
 #' @import lattice
 #' @import latticeExtra
 
-panel.plotFun1 <- function( ..f.., ...,
+usafacalc.panel.plotFun1 <- function( ..f.., ...,
                             x, y,
                             type="l",
                             lwd = trellis.par.get("superpose.line")$lwd,
@@ -400,7 +400,7 @@ panel.plotFun1 <- function( ..f.., ...,
 #' @import latticeExtra
 
 
-panel.plotFun1a <- function( ..f.., ...,
+usafacalc.panel.plotFun1a <- function( ..f.., ...,
                              x, y,
                              type="l",
                              col = trellis.par.get('superpose.line')$col,
@@ -522,7 +522,7 @@ panel.plotFun1a <- function( ..f.., ...,
 #' @import lattice
 #' @import latticeExtra
 
-panel.plotFun <- function( object, ...,
+usafacalc.panel.plotFun <- function( object, ...,
                            type="l",
                            npts=NULL,
                            zlab=NULL,
@@ -616,7 +616,7 @@ panel.plotFun <- function( object, ...,
       return(NULL)
     }
     # if we get here, surface == FALSE & ndims=2
-    npts <- ifelse( is.null(npts), 40, npts)
+    npts <- ifelse( is.null(npts), 200, npts)
     # create a function of those two variables
 
     if( length(zlab) == 0 ) zlab <- deparse(lhs(object) )
@@ -641,7 +641,7 @@ panel.plotFun <- function( object, ...,
     fillcolors <- col.regions (length(levels) + 2, alpha=alpha)
     if(is.null(levels)) levels=pretty(grid$height, nlevels)
 
-    return( panel.levelcontourplot(x = grid$Var1, y = grid$Var2, z = grid$height,
+    return( usafacalc.panel.levelcontourplot(x = grid$Var1, y = grid$Var2, z = grid$height,
                                    subscripts = 1:nrow(grid),
                                    at = levels,
                                    col.regions = fillcolors,
@@ -731,7 +731,7 @@ inferArgs <- function( vars, dots, defaults=alist(xlim=, ylim=, zlim=), variants
 #' @import lattice
 #' @import latticeExtra
 
-panel.levelcontourplot <- function(x, y, z, subscripts=1,
+usafacalc.panel.levelcontourplot <- function(x, y, z, subscripts=1,
                                    at, shrink, labels = TRUE,
                                    label.style = c("mixed","flat","align"),
                                    contour = FALSE,

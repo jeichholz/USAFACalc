@@ -55,6 +55,11 @@ a modest number of zeros near \code{near}.}
 \item{trySymbolicSingleVar}{if TRUE, try using a symbolic solver for solving the single-variable equation rather than skipping right to numeric.}
 
 \item{forceMultivariableNumeric}{if TRUE, skip the symbolic solver for your multivariable system and go right to numeric.}
+
+\item{verbose}{if TRUE, print out information about progress.}
+
+\item{roundDigits}{if x1 and x2 are found numerically, if x1 and x2 round to the same
+number at roundDigits place, then treat x1 and x2 as the same root.}
 }
 \description{
 Find a zero of an expression, or system of expressions.
