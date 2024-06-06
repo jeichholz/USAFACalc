@@ -12,7 +12,7 @@
 #' @param plot the plot to which this should be added, default is the current plot.
 #' @examples
 #' # example code
-#' f=makeFun(c(-y,x)~x&y)
+#' f=mosaic::makeFun(c(-y,x)~x&y)
 #' plotVectorField(f(x,y)~x&y, xlim=c(-3,3),ylim=c(-4,4))
 #'
 #' #You can set the color, line width, or line type as well.
@@ -53,7 +53,7 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),
     x=grid[i,]$Var1;
     y=grid[i,]$Var2;
     vec=FUN(x,y);
-    nrmvec=sqrt(dot(vec,vec));
+    nrmvec=sqrt(mosaic::dot(vec,vec));
     if (nrmvec>0){
       vecN=vec/nrmvec;
     }
@@ -83,7 +83,7 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),
 
   if (!add){
     print(lattice::xyplot(Var2~Var1,panel=function(...){
-      panel.arrows(x0=grid$Var1,y0=grid$Var2,x1=grid$toVar1,y1=grid$toVar2,length=0.2*radius,col=grid$Color,lwd=lwd,lty=lty)
+      lattice::panel.arrows(x0=grid$Var1,y0=grid$Var2,x1=grid$toVar1,y1=grid$toVar2,length=0.2*radius,col=grid$Color,lwd=lwd,lty=lty)
 
     },data=grid,xlab=allVars[[1]],ylab=allVars[[2]]))
   }
@@ -92,7 +92,7 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),
      # print(plot + latticeExtra::layer(do.call(panel.arrows, list(grid$Var1, grid$Var2,grid$toVar1,grid$toVar2)),
     #                             data = as.list(environment()), under = under))
 
-     print(plot + latticeExtra::layer(do.call(panel.arrows, list(grid$Var1, grid$Var2,grid$toVar1,grid$toVar2,col=grid$Color,length=0.2*radius,lwd=lwd,lty=lty)),
+     print(plot + latticeExtra::layer(do.call(lattice::panel.arrows, list(grid$Var1, grid$Var2,grid$toVar1,grid$toVar2,col=grid$Color,length=0.2*radius,lwd=lwd,lty=lty)),
                                  data = as.list(environment()), under = under))
   }
 
@@ -112,8 +112,9 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),
 #' @examples
 #'  #Consider the ODE
 #'  #y'=1/2*y+cos(t)
-#'  #Just give the plotter the right hand side with an expression as usual.  The expression MUST have both t and y as variables
-#'  #on the right hand side, even if it is autonomous and only y shows up in the formula.
+#'  #Just give the plotter the right hand side with an expression as usual.  The expression
+#'  #MUST have both t and y as variables on the right hand side, even if it is autonomous
+#'  #and only y shows up in the formula.
 #'  plotODEDirectionField(1/2*y+cos(t)~t&y)
 #'
 #'  #You can set the color, line width, and type as well.
@@ -121,10 +122,10 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),
 #'
 #'  #You can add it to another plot, or another plot to it.
 #'  results=Euler(1/2*y+cos(t)~t&y,tlim=c(0,10),y0=0,stepSize=0.1)
-#'  plotPoints(y~t,data=results,add=TRUE)
+#'  mosaic::plotPoints(y~t,data=results,add=TRUE)
 #'
-#'  #You can also just plot a vector field and add on trajectories from different initial conditions using the y0s option.
-#'  #add one initial value for every trajectory you want.
+#'  #You can also just plot a vector field and add on trajectories from different initial
+#'  #conditions using the y0s option. Add one initial value for every trajectory you want.
 #'  plotODEDirectionField(1/2*y+cos(t)~t&y,y0s=c(-2,0,-1,2))
 #'
 #' @export

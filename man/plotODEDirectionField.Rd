@@ -47,8 +47,9 @@ Plot a direction field for a scalar ODE
 \examples{
  #Consider the ODE
  #y'=1/2*y+cos(t)
- #Just give the plotter the right hand side with an expression as usual.  The expression MUST have both t and y as variables
- #on the right hand side, even if it is autonomous and only y shows up in the formula.
+ #Just give the plotter the right hand side with an expression as usual.  The expression
+ #MUST have both t and y as variables on the right hand side, even if it is autonomous
+ #and only y shows up in the formula.
  plotODEDirectionField(1/2*y+cos(t)~t&y)
 
  #You can set the color, line width, and type as well.
@@ -56,10 +57,10 @@ Plot a direction field for a scalar ODE
 
  #You can add it to another plot, or another plot to it.
  results=Euler(1/2*y+cos(t)~t&y,tlim=c(0,10),y0=0,stepSize=0.1)
- plotPoints(y~t,data=results,add=TRUE)
+ mosaic::plotPoints(y~t,data=results,add=TRUE)
 
- #You can also just plot a vector field and add on trajectories from different initial conditions using the y0s option.
- #add one initial value for every trajectory you want.
+ #You can also just plot a vector field and add on trajectories from different initial
+ #conditions using the y0s option. Add one initial value for every trajectory you want.
  plotODEDirectionField(1/2*y+cos(t)~t&y,y0s=c(-2,0,-1,2))
 
 }

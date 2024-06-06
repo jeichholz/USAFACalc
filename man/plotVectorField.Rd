@@ -45,7 +45,7 @@ Scales all vectors to have same length
 }
 \examples{
 # example code
-f=makeFun(c(-y,x)~x&y)
+f=mosaic::makeFun(c(-y,x)~x&y)
 plotVectorField(f(x,y)~x&y, xlim=c(-3,3),ylim=c(-4,4))
 
 #You can set the color, line width, or line type as well.

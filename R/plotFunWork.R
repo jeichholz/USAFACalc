@@ -5,14 +5,14 @@
 #'
 #' @inheritParams mosaic::plotFun
 #' @export
-plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
+plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NULL,
           under = FALSE, xlim = NULL, ylim = NULL, npts = NULL, ylab = NULL,
           xlab = NULL, zlab = NULL, filled = TRUE, levels = NULL,
           nlevels = 10, labels = TRUE, surface = FALSE, groups = NULL,
-          col = trellis.par.get("superpose.line")$col, col.regions = topo.colors,
-          type = "l", lwd = trellis.par.get("superpose.line")$lwd,
-          lty = trellis.par.get("superpose.line")$lty, alpha = NULL,
-          discontinuities = NULL, discontinuity = 1, interactive = rstudio_is_available())
+          col = lattice::trellis.par.get("superpose.line")$col, col.regions = topo.colors,
+          type = "l", lwd = lattice::trellis.par.get("superpose.line")$lwd,
+          lty = lattice::trellis.par.get("superpose.line")$lty, alpha = NULL,
+          discontinuities = NULL, discontinuity = 1, interactive = mosaic::rstudio_is_available())
 {
   if (is.function(object)) {
     formula <- f(x) ~ x
@@ -24,14 +24,14 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
   if (discontinuity <= 0 | length(discontinuity) != 1)
     stop("discontinuity should be a positive number or Inf.")
   dots <- list(...)
-  ..f.. <- do.call("makeFun", c(object, dots, strict.declaration = FALSE),
+  ..f.. <- do.call(mosaicCore::makeFun, c(object, dots, strict.declaration = FALSE),
                    envir = parent.frame())
   if (is.vector(col.regions))
     col.regions <- makeColorscheme(col.regions)
   if (length(unique(levels)) == 1)
     levels = c(levels, Inf)
   vars <- formals(..f..)
-  rhsVars <- all.vars(rhs(object))
+  rhsVars <- all.vars(mosaicCore::rhs(object))
   otherVars <- setdiff(names(vars), rhsVars)
   ndims <- length(rhsVars)
   cleanDots <- dots
@@ -52,16 +52,16 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
   fList <- if (nrow(paramGrid) < 1)
     list(..f..)
   else list()
-  for (r in rows(paramGrid)) {
+  for (r in mosaicCore::rows(paramGrid)) {
     rowAsList <- as.list(paramGrid[r, ])
     names(rowAsList) <- otherVars
-    fList <- c(fList, do.call("makeFun", c(object, c(dots,
+    fList <- c(fList, do.call(mosaicCore::makeFun, c(object, c(dots,
                                                      rowAsList, strict.declaration = FALSE, envir = parent.frame()))))
   }
   if (add) {
     if (ndims == 1) {
       rlang::check_installed("latticeExtra")
-      return(plot + latticeExtra::layer(do.call(usafacalc.panel.plotFun1,
+      return(plot + latticeExtra::layer(do.call(panel.usafacalc.plotFun1,
                                                 c(list(..f.. = fList, npts = npts, discontinuity = discontinuity,
                                                        discontinuities = discontinuities, filled = filled,
                                                        levels = levels, nlevels = nlevels, surface = surface,
@@ -70,7 +70,7 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
                                         data = as.list(environment()), ..., under = under))
     }
     rlang::check_installed("latticeExtra")
-    return(plot + latticeExtra::layer(do.call(usafacalc.panel.plotFun,
+    return(plot + latticeExtra::layer(do.call(panel.usafacalc.plotFun,
                                               c(list(object = object, npts = npts, discontinuity = discontinuity,
                                                      discontinuities = discontinuities, filled = filled,
                                                      levels = levels, nlevels = nlevels, suface = surface,
@@ -81,14 +81,14 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
   limits <- inferArgs(dots = dots, vars = rhsVars, defaults = list(xlim = xlim,
                                                                    ylim = ylim))
   if (ndims == 1) {
-    npts <- ifelse(is.null(npts), 500, npts)
+    npts <- ifelse(is.null(npts), 5000, npts)
     if (is.null(ylab))
-      ylab <- deparse(lhs(object))
+      ylab <- deparse(mosaicCore::lhs(object))
     if (is.null(xlab))
       xlab <- rhsVars
     if (is.null(limits$xlim) || length(limits$xlim) < 2) {
       zeros <- c()
-      tryCatch(zeros <- findZeros(object, nearest = 6,
+      tryCatch(zeros <- mosaic::findZeros(object, nearest = 6,
                                   ...)[[1]], error = function(e) {
                                     e
                                   }, warning = function(e) {
@@ -105,7 +105,7 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
     .xvals <- if ("h" %in% type)
       seq(base::min(limits$xlim), base::max(limits$xlim),
           length.out = npts)
-    else adapt_seq(base::min(limits$xlim), base::max(limits$xlim),
+    else mosaic::adapt_seq(base::min(limits$xlim), base::max(limits$xlim),
                    f = function(xxqq) {
                      .f.(xxqq)
                    }, length.out = npts, quiet = TRUE)
@@ -114,7 +114,7 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
                                                   .f.))
     localData <- data.frame(x = .xvals, y = .yvals, component = contintuous_components(.xvals,
                                                                                        .yvals, adjust = discontinuity))
-    localData$alone <- ediff(localData$component) * ediff(localData$component,
+    localData$alone <- mosaicCore::ediff(localData$component) * mosaicCore::ediff(localData$component,
                                                           pad = "tail") != 0
     localData <- localData[!localData$alone, ]
     localData <- data.frame(x = range(localData$x, na.rm = TRUE,
@@ -124,7 +124,7 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
       thePlot <- do.call(lattice::xyplot, c(list(y ~ x,
                                                  ..f.. = fList, data = localData, groups = substitute(groups),
                                                  xlim = limits$xlim, xlab = xlab, ylab = ylab,
-                                                 panel = "panel.plotFun1", npts = npts, discontinuity = discontinuity,
+                                                 panel = "panel.usafacalc.plotFun1", npts = npts, discontinuity = discontinuity,
                                                  discontinuities = discontinuities, col = col,
                                                  lwd = lwd, lty = lty), cleanDots))
     }
@@ -132,7 +132,7 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
       thePlot <- do.call(lattice::xyplot, c(list(y ~ x,
                                                  ..f.. = fList, data = localData, groups = substitute(groups),
                                                  xlim = limits$xlim, ylim = limits$ylim, xlab = xlab,
-                                                 ylab = ylab, panel = "panel.plotFun1", npts = npts,
+                                                 ylab = ylab, panel = "panel.usafacalc.plotFun1", npts = npts,
                                                  discontinuity = discontinuity, discontinuities = discontinuities,
                                                  col = col, lty = lty, lwd = lwd, alpha = alpha),
                                             cleanDots))
@@ -146,7 +146,7 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
     if (length(xlab) == 0)
       xlab <- rhsVars[1]
     if (length(zlab) == 0)
-      zlab <- deparse(lhs(object))
+      zlab <- deparse(mosaicCore::lhs(object))
     if (is.null(limits$xlim) || length(limits$xlim) < 2)
       limits$xlim <- c(0, 1)
     else limits$xlim <- range(limits$xlim)
@@ -174,8 +174,8 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
       zcuts = pretty(grid$height, 50)
       zcolors = col.regions(length(zcuts), alpha = 0.5 *
                               alpha)
-      if (interactive && rstudio_is_available()) {
-        return(manipulate::manipulate(wireframe(height ~
+      if (interactive && mosaic::rstudio_is_available()) {
+        return(manipulate::manipulate(lattice::wireframe(height ~
                                                   Var1 + Var2, xlab = xlab, ylab = ylab, zlab = list(zlab,
                                                                                                      rot = 90), data = grid, groups = eval(substitute(groups),
                                                                                                                                            localData), drape = filled, shade = FALSE,
@@ -189,7 +189,7 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
                                                                 step = 0.01, initial = 0.2, label = "Distance")))
       }
       else {
-        return((wireframe(height ~ Var1 + Var2, xlab = xlab,
+        return((lattice::wireframe(height ~ Var1 + Var2, xlab = xlab,
                           ylab = ylab, zlab = list(zlab, rot = 90),
                           data = grid, groups = eval(substitute(groups),
                                                      localData), drape = filled, shade = FALSE,
@@ -206,12 +206,12 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
         if (is.null(at))
           at = pretty(z, ncontours)
         argsToPass <- list(z ~ x * y, at = at, xlab = xlab,
-                           ylab = ylab, panel = usafacalc.panel.levelcontourplot,
+                           ylab = ylab, panel = panel.usafacalc.levelcontourplot,
                            groups = substitute(groups), col.regions = col.regions(60),
                            contour = contours, labels = labels, colorkey = FALSE,
                            retion = TRUE, filled = filled, ...)
         argsToPass[["k"]] <- NULL
-        return((do.call(levelplot, argsToPass)))
+        return((do.call(lattice::levelplot, argsToPass)))
       }
       if (is.null(alpha))
         alpha <- 1
@@ -221,7 +221,7 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
         nlevels <- 2
       }
       if (add) {
-        return(ladd(usafacalc.panel.levelcontourplot(grid$Var1,
+        return(mosaic::ladd(panel.usafacalc.levelcontourplot(grid$Var1,
                                            grid$Var2, grid$height, subscripts = 1, at = levels,
                                            labels = labels, filled = filled, groups = eval(substitute(groups),
                                                                                            localData), col.regions = col.regions, contour = TRUE,
@@ -236,6 +236,7 @@ plotFun<-function (object, ..., plot = trellis.last.object(), add = NULL,
   stop("Bug alert: You should not get here.  Please report.")
 }
 
+#' @export
 guess_discontinuities <- function( f, xlim, ..., resolution = 10000, adjust = 1) {
   x <- seq(xlim[1], xlim[2], length.out = resolution)
   F <- Vectorize(f)
@@ -243,6 +244,7 @@ guess_discontinuities <- function( f, xlim, ..., resolution = 10000, adjust = 1)
   discontinuity_at(x, y, adjust = adjust)
 }
 
+#' @export
 discontinuity_at <- function(x, y, adjust = 1) {
   y[!is.finite(y)] <- NA
   y_scaled <- (y - base::min(y, na.rm = TRUE)) / diff(range(y[is.finite(y)]))
@@ -262,6 +264,7 @@ discontinuity_at <- function(x, y, adjust = 1) {
   )]
 }
 
+#' @export
 contintuous_components <- function(x, y, adjust = 1) {
   y[!is.finite(y)] <- NA
   y_scaled <- (y - base::min(y, na.rm = TRUE)) / diff(range(y[is.finite(y)]))
@@ -285,7 +288,7 @@ contintuous_components <- function(x, y, adjust = 1) {
 }
 
 # lengths of points on one continuous branch of a function.
-
+#' @export
 branch_lengths <- function(x, y, discontinuities = NULL, discontinuity = 1) {
   if (is.null(discontinuities)) discontinuities <- discontinuity_at(x, y, adjust = discontinuity)
   if (length(discontinuities) < 1L) return( length(x) )
@@ -295,16 +298,14 @@ branch_lengths <- function(x, y, discontinuities = NULL, discontinuity = 1) {
   diff( c( 0, which(diff(j+k) > 0), length(x) ) )
 }
 
-#' @import mosaic
-#' @import lattice
-#' @import latticeExtra
 
-usafacalc.panel.plotFun1 <- function( ..f.., ...,
+#' @export
+panel.usafacalc.plotFun1 <- function( ..f.., ...,
                             x, y,
                             type="l",
-                            lwd = trellis.par.get("superpose.line")$lwd,
-                            lty = trellis.par.get("superpose.line")$lty,
-                            col = trellis.par.get('superpose.line')$col,
+                            lwd = lattice::trellis.par.get("superpose.line")$lwd,
+                            lty = lattice::trellis.par.get("superpose.line")$lty,
+                            col = lattice::trellis.par.get('superpose.line')$col,
                             npts=NULL,
                             zlab=NULL,
                             filled=TRUE,
@@ -324,7 +325,7 @@ usafacalc.panel.plotFun1 <- function( ..f.., ...,
 
   if (is.numeric(col)) {
     message('converting numerical color value into a color using lattice settings')
-    col <- trellis.par.get('superpose.line')$col[col]
+    col <- lattice::trellis.par.get('superpose.line')$col[col]
   }
 
 
@@ -342,8 +343,8 @@ usafacalc.panel.plotFun1 <- function( ..f.., ...,
     #  rhsVars <- all.vars(rhs(object))
     #  ndims <- length(rhsVars)
 
-    parent.xlim <- current.panel.limits()$xlim
-    parent.ylim <- current.panel.limits()$ylim
+    parent.xlim <- lattice::current.panel.limits()$xlim
+    parent.ylim <- lattice::current.panel.limits()$ylim
 
     npts <- ifelse( is.null(npts), 200, npts)
 
@@ -355,7 +356,7 @@ usafacalc.panel.plotFun1 <- function( ..f.., ...,
       .xvals <-  if ('h' %in% type)
         seq(base::min(parent.xlim), base::max(parent.xlim), length.out=npts)
       else
-        adapt_seq(base::min(parent.xlim), base::max(parent.xlim),
+        mosaic::adapt_seq(base::min(parent.xlim), base::max(parent.xlim),
                   f=function(xxqq){ .f.(xxqq) },
                   length.out=npts,
                   quiet=TRUE)
@@ -387,7 +388,7 @@ usafacalc.panel.plotFun1 <- function( ..f.., ...,
       )
     } else {
       do.call(
-        panel.xyplot,
+        lattice::panel.xyplot,
         c(list(x=.xvals, y=.yvals, type=type,  alpha=alpha,
                lwd = lwd, lty = lty, col=.getColor(idx,col)),  cleandots)
       )
@@ -395,17 +396,15 @@ usafacalc.panel.plotFun1 <- function( ..f.., ...,
   }
 }
 
-#' @import mosaic
-#' @import lattice
-#' @import latticeExtra
 
 
-usafacalc.panel.plotFun1a <- function( ..f.., ...,
+#' @export
+panel.usafacalc.plotFun1a <- function( ..f.., ...,
                              x, y,
                              type="l",
-                             col = trellis.par.get('superpose.line')$col,
-                             lwd = trellis.par.get("superpose.line")$lwd,
-                             lty = trellis.par.get("superpose.line")$lty,
+                             col = lattice::trellis.par.get('superpose.line')$col,
+                             lwd = lattice::trellis.par.get("superpose.line")$lwd,
+                             lty = lattice::trellis.par.get("superpose.line")$lty,
                              npts=NULL,
                              zlab=NULL,
                              filled=TRUE,
@@ -425,7 +424,7 @@ usafacalc.panel.plotFun1a <- function( ..f.., ...,
 
   if (is.numeric(col)) {
     message('converting numerical color value into a color using lattice settings')
-    col <- trellis.par.get('superpose.line')$col[col]
+    col <- lattice::trellis.par.get('superpose.line')$col[col]
   }
 
 
@@ -435,8 +434,8 @@ usafacalc.panel.plotFun1a <- function( ..f.., ...,
   # perhaps use environment(object)?
   # ..f.. <- do.call( "makeFun", c(object, dots, strict.declaration=FALSE), envir= parent.frame())
 
-  parent.xlim <- current.panel.limits()$xlim
-  parent.ylim <- current.panel.limits()$ylim
+  parent.xlim <- lattice::current.panel.limits()$xlim
+  parent.ylim <- lattice::current.panel.limits()$ylim
   points_data <- data.frame()
   groups_data <- data.frame()
   id_lengths <- integer(0)
@@ -459,7 +458,7 @@ usafacalc.panel.plotFun1a <- function( ..f.., ...,
       .xvals <-  if ('h' %in% type)
         seq(base::min(parent.xlim), base::max(parent.xlim), length.out=npts)
       else
-        adapt_seq(base::min(parent.xlim), base::max(parent.xlim),
+        mosaic::adapt_seq(base::min(parent.xlim), base::max(parent.xlim),
                   f=function(xxqq){ .f.(xxqq) },
                   length.out=npts,
                   quiet=TRUE)
@@ -508,7 +507,7 @@ usafacalc.panel.plotFun1a <- function( ..f.., ...,
     )
   } else {
     do.call(
-      panel.xyplot,
+      lattice::panel.xyplot,
       c(list(x=points_data$x, y=points_data$y, type=type,
              lwd = lwd, lty = lty,
              alpha=alpha, col=.getColor(points_data$id, col)),  cleandots)
@@ -518,11 +517,9 @@ usafacalc.panel.plotFun1a <- function( ..f.., ...,
 
 
 
-#' @import mosaic
-#' @import lattice
-#' @import latticeExtra
 
-usafacalc.panel.plotFun <- function( object, ...,
+#' @export
+panel.usafacalc.plotFun <- function( object, ...,
                            type="l",
                            npts=NULL,
                            zlab=NULL,
@@ -531,9 +528,9 @@ usafacalc.panel.plotFun <- function( object, ...,
                            nlevels=10,
                            surface=FALSE,
                            col.regions =topo.colors,
-                           lwd = trellis.par.get("superpose.line")$lwd,
-                           lty = trellis.par.get("superpose.line")$lty,
-                           col = trellis.par.get("superpose.line")$col,
+                           lwd = lattice::trellis.par.get("superpose.line")$lwd,
+                           lty = lattice::trellis.par.get("superpose.line")$lty,
+                           col = lattice::trellis.par.get("superpose.line")$col,
                            alpha=NULL,
                            discontinuity = NULL,
                            discontinuities = NULL ) {
@@ -546,21 +543,21 @@ usafacalc.panel.plotFun <- function( object, ...,
 
   if ( is.vector(col.regions ) ) col.regions  <- makeColorscheme(col.regions )
 
-  plot.line <- trellis.par.get('plot.line')
-  superpose.line <- trellis.par.get('superpose.line')
+  plot.line <- lattice::trellis.par.get('plot.line')
+  superpose.line <- lattice::trellis.par.get('superpose.line')
 
   # funny names (like ..f..) are to avoid names that might be used by the user
   # not sure whether this precaution is necessary in current implementation
 
   # perhaps use environment(object)?
-  ..f.. <- do.call( "makeFun", c(object, dots, strict.declaration=FALSE), envir= parent.frame())
+  ..f.. <- do.call( mosaicCore::makeFun, c(object, dots, strict.declaration=FALSE), envir= parent.frame())
 
   vars <- formals(..f..)
-  rhsVars <- all.vars(rhs(object))
+  rhsVars <- all.vars(mosaicCore::rhs(object))
   ndims <- length(rhsVars)
 
-  parent.xlim <- current.panel.limits()$xlim
-  parent.ylim <- current.panel.limits()$ylim
+  parent.xlim <- lattice::current.panel.limits()$xlim
+  parent.ylim <- lattice::current.panel.limits()$ylim
 
   if( ndims > 2 || ndims < 1 )
     stop("Formula must provide 1 or 2 independent variables (right hand side).")
@@ -574,7 +571,7 @@ usafacalc.panel.plotFun <- function( object, ...,
       if ('h' %in% type)
         seq(base::min(parent.xlim), base::max(parent.xlim), length.out=npts)
     else
-      adapt_seq(base::min(parent.xlim), base::max(parent.xlim),
+      mosaic::adapt_seq(base::min(parent.xlim), base::max(parent.xlim),
                 f=function(xxqq){ ..f..(xxqq) },
                 length.out=npts,
                 quiet=TRUE)
@@ -604,7 +601,7 @@ usafacalc.panel.plotFun <- function( object, ...,
       )
     } else {
       return(do.call(
-        panel.xyplot,
+        lattice::panel.xyplot,
         c(list(x=.xvals, y=.yvals, type=type, alpha=alpha, lty = lty, lwd = lwd),
           cleandots)))
     }
@@ -619,7 +616,7 @@ usafacalc.panel.plotFun <- function( object, ...,
     npts <- ifelse( is.null(npts), 200, npts)
     # create a function of those two variables
 
-    if( length(zlab) == 0 ) zlab <- deparse(lhs(object) )
+    if( length(zlab) == 0 ) zlab <- deparse(mosaicCore::lhs(object) )
 
     .xvals <- seq(base::min(parent.xlim),base::max(parent.xlim),length=npts)
     .yvals <- seq(base::min(parent.ylim),base::max(parent.ylim),length=npts)
@@ -641,7 +638,7 @@ usafacalc.panel.plotFun <- function( object, ...,
     fillcolors <- col.regions (length(levels) + 2, alpha=alpha)
     if(is.null(levels)) levels=pretty(grid$height, nlevels)
 
-    return( usafacalc.panel.levelcontourplot(x = grid$Var1, y = grid$Var2, z = grid$height,
+    return( panel.usafacalc.levelcontourplot(x = grid$Var1, y = grid$Var2, z = grid$height,
                                    subscripts = 1:nrow(grid),
                                    at = levels,
                                    col.regions = fillcolors,
@@ -655,8 +652,8 @@ usafacalc.panel.plotFun <- function( object, ...,
 }
 
 
-
-.getColor <- function( n=1, col=trellis.par.get('superpose.line')$col) {
+#' @export
+.getColor <- function( n=1, col=lattice::trellis.par.get('superpose.line')$col) {
   if (length(col) < n) col <- rep(col, length.out=n)
   col[n]
 }
@@ -678,6 +675,7 @@ usafacalc.panel.plotFun <- function( object, ...,
 # inferArgs(c('x','u','t'), list(t=c(1,3), x.lim=c(1,10), u=c(1,3), u.lim=c(2,4)))
 # inferArgs(c('x','u'), list(u=c(1,3)), defaults=list(xlim=c(0,1), ylim=NULL))
 
+#' @export
 inferArgs <- function( vars, dots, defaults=alist(xlim=, ylim=, zlim=), variants=c('.lim','lim') ) {
   limNames <- names(defaults)
   if (length(vars) > length(limNames))
@@ -700,38 +698,38 @@ inferArgs <- function( vars, dots, defaults=alist(xlim=, ylim=, zlim=), variants
   return(result)
 }
 
-# =============================
-# Create an environment for storing axis limits, etc.
-.plotFun.envir = new.env(parent=baseenv())
-# =====
-#
-# Lattice plot that draws a filled contour plot
-#
-# Used within plotFun
-#
-# @param x x on a grid
-# @param y y on a grid
-# @param z zvalues for the x and y
-# @param subscripts which points to plot
-# @param at cuts for the contours
-# @param shrink what does this do?
-# @param labels draw the contour labels
-# @param label.style where to put the labels
-# @param contour logical draw the contours
-# @param region logical color the regions
-# @param col color for contours
-# @param lty type for contours
-# @param lwd width for contour
-# @param border type of border
-# @param ... dots additional arguments
-# @param col.regions  a vector of colors or a function (`topo.colors` by default) for generating such
-# @param filled whether to fill the contours with color
-# @param alpha.regions transparency of regions
-#' @import mosaic
-#' @import lattice
-#' @import latticeExtra
+#' =============================
+#' Create an environment for storing axis limits, etc.
+#' .plotFun.envir = new.env(parent=baseenv())
+#' =====
+#'
+#' Lattice plot that draws a filled contour plot
+#'
+#' Used within plotFun
+#'
+#' @param x x on a grid
+#' @param y y on a grid
+#' @param z zvalues for the x and y
+#' @param subscripts which points to plot
+#' @param at cuts for the contours
+#' @param shrink what does this do?
+#' @param labels draw the contour labels
+#' @param label.style where to put the labels
+#' @param contour logical draw the contours
+#' @param region logical color the regions
+#' @param col color for contours
+#' @param lty type for contours
+#' @param lwd width for contour
+#' @param border type of border
+#' @param ... dots additional arguments
+#' @param col.regions  a vector of colors or a function (`topo.colors` by default) for generating such
+#' @param filled whether to fill the contours with color
+#' @param alpha.regions transparency of regions
+#' @importFrom lattice trellis.par.get
+#' @importFrom lattice panel.levelplot
 
-usafacalc.panel.levelcontourplot <- function(x, y, z, subscripts=1,
+#' @export
+panel.usafacalc.levelcontourplot <- function(x, y, z, subscripts=1,
                                    at, shrink, labels = TRUE,
                                    label.style = c("mixed","flat","align"),
                                    contour = FALSE,
@@ -745,8 +743,8 @@ usafacalc.panel.levelcontourplot <- function(x, y, z, subscripts=1,
                                    alpha.regions = regions$alpha
 )
 {
-  add.line <- trellis.par.get('add.line')
-  regions <- trellis.par.get('regions')
+  add.line <- lattice::trellis.par.get('add.line')
+  regions <- lattice::trellis.par.get('regions')
 
   if(filled) panel.levelplot(x, y, z, subscripts,
                              at = pretty(z,5*length(at)), shrink,
@@ -771,21 +769,19 @@ usafacalc.panel.levelcontourplot <- function(x, y, z, subscripts=1,
                   border = border, ...)
 }
 
-# Create a color generating function from a vector of colors
-#
-# @param col a vector of colors
-# @return a function that generates a vector of colors interpolated among the colors in `col`
-#
-# @examples
-# cs <- makeColorscheme( c('red','white','blue') )
-# cs(10)
-# cs(10, alpha=.5)
-#
-# @import mosaic
-# @import lattice
-# @import latticeExtra
+#' Create a color generating function from a vector of colors
+#'
+#' @param col a vector of colors
+#' @return a function that generates a vector of colors interpolated among the colors in `col`
+#'
+#' @examples
+#' cs <- makeColorscheme( c('red','white','blue') )
+#' cs(10)
+#' cs(10, alpha=.5)
+#'
 
 
+#' @export
 makeColorscheme <- function(col) {
   result <- function(n, alpha=1, ...)  {
     idx <-  0.5 + (0:n)/(n+0.001) * (length(colorList))

@@ -35,16 +35,14 @@
 #' @param verbose if TRUE, print out information about progress.
 #' @param roundDigits if x1 and x2 are found numerically, if x1 and x2 round to the same
 #' number at roundDigits place, then treat x1 and x2 as the same root.
-#' @import mosaicCore
-#' @import mosaicCalc
-#' @import caracas
-#' @import nleqslv
-#' @import magrittr
 #' @importFrom grDevices col2rgb rgb topo.colors
 #' @importFrom stats aggregate dist na.exclude rnorm
 #' @importFrom dplyr mutate
 #' @importFrom dplyr filter
 #' @importFrom utils str
+#' @importFrom mosaicCore rhs
+#' @importFrom mosaicCore lhs
+#' @importFrom magrittr %>%
 #' @examples
 #' # solve sin(x)=cos(x)
 #' findZeros(sin(x)-cos(x)~x)
@@ -60,7 +58,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
   dots=list(...)
 
   #Find all the variables in the expression.
-  varNames=all.vars(rhs(expr))
+  varNames=all.vars(mosaicCore::rhs(expr))
 
   #Ok, make a function which takes an expression and returns a corresponding function.
   expression2function=function(expr,variables,...){
@@ -76,7 +74,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
   }
 
   #Let's make a function for our expression(s):
-  pfun=expression2function(lhs(expr),varNames)
+  pfun=expression2function(mosaicCore::lhs(expr),varNames)
 
 
 
@@ -263,18 +261,20 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
     }))
 
 
+    `%>%` <- magrittr::`%>%`
+
     #Make a data frame to hold the roots.
     roots=data.frame(roots)
 
     #Exclude NAs, and exlude solutions that are outside of the original window.
-    roots=roots%>% na.exclude() %>% dplyr::filter(roots>=xlim[[1]]) %>% dplyr::filter(roots<=xlim[[2]]);
+    roots=roots %>% na.exclude() %>% dplyr::filter(roots>=xlim[[1]]) %>% dplyr::filter(roots<=xlim[[2]]);
 
     #if the dataframe is not empty get rid of duplicate solutions.
     #Solutions are considered duplicate if they round to the same number at 5 decimal places.
     #The average of all duplicate solutions is considered the winner.
     if (dim(roots)[[1]]>0){
       roots = roots %>% mutate(rounded_value=round(roots,roundDigits))
-      roots= roots%>% aggregate(by=list(roots$rounded_value),FUN=mean)
+      roots= roots %>% aggregate(by=list(roots$rounded_value),FUN=mean)
       roots=data.frame(roots$roots)
     }
 
@@ -340,6 +340,9 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
       solns=data.frame(data=matrix(nrow=0,ncol=numVars));
 
       solns=rbind(solns,nlsolv.solns$x);
+
+      `%>%` <- magrittr::`%>%`
+
       #Filter out solutions that we don't want.
       for (i in 1:numVars){
         solns = solns %>% filter(solns[,i]>=xbottom[[i]])

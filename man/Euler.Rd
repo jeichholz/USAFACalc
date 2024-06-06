@@ -27,5 +27,5 @@ soln
 
 results=Euler(5*y*(y-1)~t&y,tlim=c(0,10),y0=0.99,stepSize=0.1)
 results
-plotPoints(y~t,data=results)
+mosaic::plotPoints(y~t,data=results)
 }
