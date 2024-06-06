@@ -5,7 +5,12 @@
 \title{Updates the USAFACalc package, if update is available, from github. Does not
 seek to update dependencies.}
 \usage{
-updateUSAFACalc()
+updateUSAFACalc(repo = "jeichholz/USAFACalc", upgrade = "never", ...)
+}
+\arguments{
+\item{repo}{the repo to install from. Defaults to proper value.}
+
+\item{...}{will be passed into devtools::install_github}
 }
 \description{
 Updates the USAFACalc package, if update is available, from github. Does not
