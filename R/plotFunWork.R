@@ -14,6 +14,7 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
           lty = lattice::trellis.par.get("superpose.line")$lty, alpha = NULL,
           discontinuities = NULL, discontinuity = 1, interactive = mosaic::rstudio_is_available())
 {
+
   if (is.function(object)) {
     formula <- f(x) ~ x
     formula[[2]] <- as.call(list(substitute(object), quote(x)))
@@ -140,7 +141,14 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
     return((thePlot))
   }
   if (ndims == 2) {
-    npts <- ifelse(is.null(npts), 200, npts)
+
+    if (surface){
+      npts <- ifelse(is.null(npts), 40, npts)
+      alpha=1
+    }
+    else{
+      npts <- ifelse(is.null(npts), 200, npts)
+    }
     if (length(ylab) == 0)
       ylab <- rhsVars[2]
     if (length(xlab) == 0)
@@ -172,9 +180,13 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
         return(invisible(NULL))
       }
       zcuts = pretty(grid$height, 50)
-      zcolors = col.regions(length(zcuts), alpha = 0.5 *
-                              alpha)
+
+      zcolors = col.regions(length(zcuts), alpha =1)
       if (interactive && mosaic::rstudio_is_available()) {
+        #fig <- plotly::plot_ly(x=.xvals,y=.yvals,z=zvals) %>% plotly::add_surface()
+
+        #print(fig)
+        #return(fig)
         return(manipulate::manipulate(lattice::wireframe(height ~
                                                   Var1 + Var2, xlab = xlab, ylab = ylab, zlab = list(zlab,
                                                                                                      rot = 90), data = grid, groups = eval(substitute(groups),
