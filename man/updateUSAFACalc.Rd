@@ -10,6 +10,8 @@ updateUSAFACalc(repo = "jeichholz/USAFACalc", upgrade = "never", ...)
 \arguments{
 \item{repo}{the repo to install from. Defaults to proper value.}
 
+\item{upgrade}{-- upgrade option to install_github.  When set to never it will not ask about upgrading packages upon which USAFACalc depends.}
+
 \item{...}{will be passed into devtools::install_github}
 }
 \description{
