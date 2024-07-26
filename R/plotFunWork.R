@@ -199,7 +199,15 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
                                                               step = 0.01, initial = 0.2, label = "Distance"))
         #Create a plotly surface plot and print it, it looks better. By doing it last, if this is working, then the Viewer tab should be
         #the one that the student sees by default.
-        fig <- plotly::plot_ly(x=.xvals,y=.yvals,z=zvals) %>% plotly::add_surface()
+        fig <- plotly::plot_ly(x=.xvals,y=.yvals,z=zvals,
+                               contours = list(
+                                 z = list(
+                                   show=TRUE,
+                                   usecolormap=TRUE,
+                                   highlightcolor="black",
+                                   project=list(z=TRUE)
+                                 )
+                               )) %>% plotly::add_surface()
         print(fig)
 
 
