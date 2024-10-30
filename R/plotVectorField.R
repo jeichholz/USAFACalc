@@ -23,7 +23,7 @@
 #' plotVectorField(f(x,y)~x&y, xlim=c(-3,3),ylim=c(-4,4),col="green",lwd=3,lty=1,add=TRUE)
 #' @export
 plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),
-                            grid.by = (xlim[[2]]-xlim[[1]])/19,radius=grid.by*0.8,col=NA,lwd=1,lty=1,add=FALSE,plot = lattice::trellis.last.object()){
+                            grid.by = (xlim[[2]]-xlim[[1]])/19,radius=grid.by*0.8,col=NA,lwd=1,lty=1,add=FALSE,smooth=FALSE, plot = lattice::trellis.last.object()){
 
   #expression should be an expression which takes as input two variables and returns a list of length 2 as output.
 
@@ -49,6 +49,11 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),
   grid$toVar2=0;
   grid$Color=col;
 
+  redfunc= function(theta) {floor(255*bump(theta,x0=0,r=2*pi/3))+floor(255*bump(theta,x0=2*pi,r=2*pi/3))};
+  greenfunc=function(theta) {floor(255*bump(theta,x0=2*pi/3,r=2*pi/3))};
+  bluefunc=function(theta) {floor(255*bump(theta,x0=4*pi/3,r=2*pi/3))};
+
+
   for (i in 1:dim(grid)[[1]]){
     x=grid[i,]$Var1;
     y=grid[i,]$Var2;
@@ -62,8 +67,20 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),
     }
 
     slope=vec[[2]]/vec[[1]];
+
+
     if (is.na(grid[i,]$Color)){
-      if(is.na(slope)){
+      if (smooth==TRUE){
+        theta=atan(slope);
+        if (theta<0){theta=2*pi+theta};
+        if (vec[[1]]<0){
+          theta=theta-pi;
+        }
+        cor=ggtern::rgb2hex(redfunc(theta),greenfunc(theta),bluefunc(theta));
+        cat(paste(theta,"\n"))
+        grid[i,]$Color=cor;
+      }
+      else if(is.na(slope)){
                 cor = "black"
       } else if(slope > 0){
                 cor = "blue"
@@ -151,6 +168,13 @@ plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),y0s=NA, grid
     }
   }
 
+}
+
+bump <- function(x,x0=0,r=1,h=1){
+  y=x*0;
+  y=(abs(x-x0)<r-1e-2)*h*exp(1/(((x-x0)/r)^2-1))/exp(-1);
+  y[is.na(y)]=0;
+  return(y);
 }
 
 

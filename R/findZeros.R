@@ -51,7 +51,7 @@
 findZeros=function(expr, ..., xlim = c(near - within, near + within),
                            near = 0, within = Inf, nearest = 10, npts = 1000, iterate = 1,
                            sortBy = c("byx", "byy", "radial"),trySymbolicSingleVar=FALSE,forceMultivariableNumeric=FALSE,
-                          verbose=TRUE,roundDigits=5){
+                          verbose=FALSE,roundDigits=5){
 
   #first things first, get the dots arguments.  This is for the purpose of calling the original findZeros,
   #should the sympy method fail.
@@ -59,7 +59,6 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
 
   #Find all the variables in the expression.
   varNames=all.vars(mosaicCore::rhs(expr))
-
   #Ok, make a function which takes an expression and returns a corresponding function.
   expression2function=function(expr,variables,...){
     dots=list(...);
@@ -75,9 +74,6 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
 
   #Let's make a function for our expression(s):
   pfun=expression2function(mosaicCore::lhs(expr),varNames)
-
-
-
 
   #This will extract a numeric R value from a caracas number
   #There are two options.  First, convert the symbolic number to an exact string, something like sqrt(2)+3i, then have R evaluate that number.
