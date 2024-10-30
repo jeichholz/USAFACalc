@@ -7,8 +7,20 @@
 #' #Integrate returns just a plain number now, so you can do stuff like:
 #' int=integrate(x^2~x,xlim=c(-4,4))
 #' int
+#' @examples
+#' integrate(t^2~t,tlim=c(0,5))
+#'
 #' @export
-integrate=function(expression,xlim=NA){
+integrate=function(expression,xlim=NA,...){
+  dots=list(...)
+
+  #Find all the variables in the expression.
+  rhsVars=all.vars(mosaicCore::rhs(expression))
+
+  lims <- mosaic::inferArgs(dots = dots, vars = rhsVars, defaults = list(xlim = xlim))
+
+  xlim=lims$xlim
+
 
   if (any(is.na(xlim))){
     stop("You must provide an interval to integrate over using xlim=...")
