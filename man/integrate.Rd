@@ -4,7 +4,7 @@
 \alias{integrate}
 \title{integrate an expression over a finite interval.  A wrapper for stats::integrate}
 \usage{
-integrate(expression, xlim = NA)
+integrate(expression, xlim = NA, ...)
 }
 \arguments{
 \item{expression}{the expression to integrate}
@@ -22,4 +22,6 @@ integrate(x^2~x, xlim=c(-4,4))
 #Integrate returns just a plain number now, so you can do stuff like:
 int=integrate(x^2~x,xlim=c(-4,4))
 int
+integrate(t^2~t,tlim=c(0,5))
+
 }

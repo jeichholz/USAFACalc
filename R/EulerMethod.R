@@ -21,7 +21,7 @@ hello=function(){
 #'
 #'
 #' results=Euler(c(-y,x)~x&y,tlim=c(0,10),ic=c(1,0),stepSize=0.01)
-#' results
+#' head(results)
 #' mosaic::plotPoints(y~x,data=results)
 #'
 #' results=Euler(c(-y,x)~x&y,tlim=c(0,10),ic=c(y=0,x=1),stepSize=0.01)
