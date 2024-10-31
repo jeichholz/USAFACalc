@@ -2,6 +2,7 @@
 
 export(.getColor)
 export(Euler)
+export(antiD)
 export(branch_lengths)
 export(contintuous_components)
 export(discontinuity_at)
