@@ -15,6 +15,7 @@ plotVectorField(
   lwd = 1,
   lty = 1,
   add = FALSE,
+  smooth = FALSE,
   plot = lattice::trellis.last.object()
 )
 }
