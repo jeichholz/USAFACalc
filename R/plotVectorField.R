@@ -125,12 +125,12 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),
 #' @param tlim the extent of the horizonatal axis
 #' @param ylim the extend of the vertical axis
 #' @inheritParams plotVectorField
-#' @param y0s If desired, a list of initial values from which to draw trajectories.
+#' @param ics If desired, a list of initial values from which to draw trajectories.
 #' @examples
 #'  #Consider the ODE
 #'  #y'=1/2*y+cos(t)
 #'  #Just give the plotter the right hand side with an expression as usual.  You may omit t
-#'  if the equation is autnomous. If you include t, it *must* be the first argument.
+#'  #if the equation is autnomous. If you include t, it *must* be the first argument.
 #'  plotODEDirectionField(1/2*y+cos(t)~t&y)
 #'
 #'
@@ -139,10 +139,11 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),
 #'  plotODEDirectionField(1/2*y+cos(t)~t&y,col="black",lwd=2)
 #'
 #'  #You can add it to another plot, or another plot to it.
-#'  results=Euler(1/2*y+cos(t)~t&y,tlim=c(0,10),y0=0,stepSize=0.1)
+#'  results=Euler(1/2*y+cos(t)~t&y,tlim=c(0,10),ic=0,stepSize=0.1)
 #'  mosaic::plotPoints(y~t,data=results,add=TRUE)
 #'
-#'  plotODEDirectionField(-y*(y-1)~y)
+#'  #You can give an autonomous equation and not specify t as an input.
+#'  plotODEDirectionField(-y*(y-1)~y,tlim=c(0,4),ylim=c(-0.1,2.1),grid.by=0.2)
 #'
 #'  #You can also just plot a vector field and add on trajectories from different initial
 #'  #conditions using the y0s option. Add one initial value for every trajectory you want.
@@ -159,7 +160,7 @@ plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),ics=NA, grid
   if (!("t" %in% allVars)){
     exprstr=as.character(expression)
 
-    expression=as.formula(paste(exprstr[[2]],"~t&",exprstr[[3]],collapse=" "))
+    expression=stats::as.formula(paste(exprstr[[2]],"~t&",exprstr[[3]],collapse=" "))
     allVars=all.vars(mosaic::rhs(expression))
   }
 

@@ -64,7 +64,7 @@ Euler=function(dydt,tlim,ic,stepSize=(tlim[[2]]-tlim[[1]])/10){
   #If the function was declared without t as a variable, add t to the list of variables
   #so that calling is simpler later.
   if (isAutonomous){
-    dydt=as.formula(paste(dydtstr[[2]],"~t&",dydtstr[[3]],collapse=" "))
+    dydt=stats::as.formula(paste(dydtstr[[2]],"~t&",dydtstr[[3]],collapse=" "))
   }
 
   #now get the initial condition right.  If there were no names given in the IC,
@@ -92,7 +92,7 @@ Euler=function(dydt,tlim,ic,stepSize=(tlim[[2]]-tlim[[1]])/10){
   yi=y0;
   ti=t0;
   for (i in 2:(numSteps+1)){
-    yi=yi+stepSize*do.call(dydtfunc,args=as.list(setNames(c(ti,yi),c("t",stateVars))))
+    yi=yi+stepSize*do.call(dydtfunc,args=as.list(stats::setNames(c(ti,yi),c("t",stateVars))))
     ti=ti+stepSize;
     solution[i,]=c(ti,yi);
   }

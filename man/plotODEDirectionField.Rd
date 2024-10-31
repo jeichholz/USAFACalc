@@ -8,7 +8,7 @@ plotODEDirectionField(
   expression,
   tlim = c(0, 10),
   ylim = c(-5, 5),
-  y0s = NA,
+  ics = NA,
   grid.by = (tlim[[2]] - tlim[[1]])/19,
   radius = grid.by * 0.8,
   col = NA,
@@ -25,7 +25,7 @@ plotODEDirectionField(
 
 \item{ylim}{the extend of the vertical axis}
 
-\item{y0s}{If desired, a list of initial values from which to draw trajectories.}
+\item{ics}{If desired, a list of initial values from which to draw trajectories.}
 
 \item{grid.by}{the spacing between arrow bases}
 
@@ -47,20 +47,24 @@ Plot a direction field for a scalar ODE
 \examples{
  #Consider the ODE
  #y'=1/2*y+cos(t)
- #Just give the plotter the right hand side with an expression as usual.  The expression
- #MUST have both t and y as variables on the right hand side, even if it is autonomous
- #and only y shows up in the formula.
+ #Just give the plotter the right hand side with an expression as usual.  You may omit t
+ #if the equation is autnomous. If you include t, it *must* be the first argument.
  plotODEDirectionField(1/2*y+cos(t)~t&y)
+
+
 
  #You can set the color, line width, and type as well.
  plotODEDirectionField(1/2*y+cos(t)~t&y,col="black",lwd=2)
 
  #You can add it to another plot, or another plot to it.
- results=Euler(1/2*y+cos(t)~t&y,tlim=c(0,10),y0=0,stepSize=0.1)
+ results=Euler(1/2*y+cos(t)~t&y,tlim=c(0,10),ic=0,stepSize=0.1)
  mosaic::plotPoints(y~t,data=results,add=TRUE)
+
+ #You can give an autonomous equation and not specify t as an input.
+ plotODEDirectionField(-y*(y-1)~y,tlim=c(0,4),ylim=c(-0.1,2.1),grid.by=0.2)
 
  #You can also just plot a vector field and add on trajectories from different initial
  #conditions using the y0s option. Add one initial value for every trajectory you want.
- plotODEDirectionField(1/2*y+cos(t)~t&y,y0s=c(-2,0,-1,2))
+ plotODEDirectionField(1/2*y+cos(t)~t&y,ics=c(-2,0,-1,2))
 
 }
