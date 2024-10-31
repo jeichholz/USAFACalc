@@ -4,14 +4,17 @@
 \alias{Euler}
 \title{Run Euler's method on an ODE.}
 \usage{
-Euler(dydt, tlim, y0, stepSize = (tlim[[2]] - tlim[[1]])/10)
+Euler(dydt, tlim, ic, stepSize = (tlim[[2]] - tlim[[1]])/10)
 }
 \arguments{
-\item{dydt}{an expression of t and y, in that order,  defining the right hand side of the ODE.}
+\item{dydt}{an expression defining the right hand side of the ODE. If this is a system of ODE,
+then the order of the equations is the order in which the variables are listed in the expression. t must be the time variable.}
 
 \item{tlim}{a list containing the start and end of the timeframe to integrate over}
 
-\item{y0}{the initial condition}
+\item{ic}{the initial condition.  If this is a scalar ODE then you can do ic=4. If this is a system then you
+must provide a list of values in the correct order as determined by the listing of varaibles in dydt. You may also
+provide a list with names, in that case order doesn't matter.}
 
 \item{stepSize}{length of timestep to take.}
 }
@@ -22,10 +25,19 @@ A data frame containing the approximations of the solutions and the correspondin
 Run Euler's method on an ODE.
 }
 \examples{
-soln=Euler(y*(y-1) ~ t&y, tlim=c(0,10),y0=0.99)
+soln=Euler(y*(y-1) ~ t&y, tlim=c(0,10),ic=0.99)
 soln
 
-results=Euler(5*y*(y-1)~t&y,tlim=c(0,10),y0=0.99,stepSize=0.1)
+results=Euler(5*y*(y-1)~t&y,tlim=c(0,10),ic=0.99,stepSize=0.1)
 results
 mosaic::plotPoints(y~t,data=results)
+
+
+results=Euler(c(-y,x)~x&y,tlim=c(0,10),ic=c(1,0),stepSize=0.01)
+head(results)
+mosaic::plotPoints(y~x,data=results)
+
+results=Euler(c(-y,x)~x&y,tlim=c(0,10),ic=c(y=0,x=1),stepSize=0.01)
+head(results)
+mosaic::plotPoints(y~x,data=results)
 }
