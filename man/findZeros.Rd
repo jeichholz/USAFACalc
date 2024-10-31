@@ -16,7 +16,7 @@ findZeros(
   sortBy = c("byx", "byy", "radial"),
   trySymbolicSingleVar = FALSE,
   forceMultivariableNumeric = FALSE,
-  verbose = TRUE,
+  verbose = FALSE,
   roundDigits = 5
 )
 }
