@@ -14,7 +14,6 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
           lty = lattice::trellis.par.get("superpose.line")$lty, alpha = NULL,
           discontinuities = NULL, discontinuity = 1, interactive = mosaic::rstudio_is_available())
 {
-
   if (is.function(object)) {
     formula <- f(x) ~ x
     formula[[2]] <- as.call(list(substitute(object), quote(x)))
