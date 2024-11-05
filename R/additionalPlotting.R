@@ -7,6 +7,7 @@
 #' @param alpha the transparency of the shaded region
 #' @param add whether to add the solid region to current figure or start anew
 #' @param xlim the region above which to draw
+#' @param addoutline whether or not to graph the one/two curves in a highlight black color to make a nice outline.
 #' @examples
 #' f=mosaic::makeFun(sin(x)~x)
 #' plotFunFill(f(x)~x,xlim=c(-3,3))
@@ -26,7 +27,7 @@
 #' #mosaic::ladd(panel.grid(h=-1,v=-1,col="grey"))
 #'
 #' @export
-plotFunFill=function(f,bottom=0,xlim=c(0,1),col="red",alpha=0.5,add=FALSE, plot=lattice::trellis.last.object(),...){
+plotFunFill=function(f,bottom=0,xlim=c(0,1),col="red",alpha=0.5,add=FALSE, addoutline=TRUE, plot=lattice::trellis.last.object(),...){
   dots=list(...)
 
   #browser()
@@ -53,11 +54,26 @@ plotFunFill=function(f,bottom=0,xlim=c(0,1),col="red",alpha=0.5,add=FALSE, plot=
   #trellis.last.object()+latticeExtra::panel.xyarea(xs,ys,origin=0,data=c(xs=xs,ys=ys))
   d=data.frame(x=xs,y=ys)
   if(add==FALSE){
-    return(lattice::xyplot(y ~ x, data = d, panel = lattice::panel.polygon, xlim=xlim, rule = "none", col=col,alpha=alpha, ...))
+    A=lattice::xyplot(y ~ x, data = d, panel = lattice::panel.polygon, xlim=xlim, rule = "none", col=col,alpha=alpha, ...)
   }
   else{
-    return(plot+lattice::xyplot(y ~ x, data = d, panel = lattice::panel.polygon,  rule = "none", col=col,alpha=alpha, ...))
+    A=plot+lattice::xyplot(y ~ x, data = d, panel = lattice::panel.polygon,  rule = "none", col=col,alpha=alpha, ...)
   }
+
+  if (addoutline){
+    xs=seq(xlim[[1]],xlim[[2]],length.out=N);
+    A=A+lattice::xyplot(y~x,data=data.frame(x=xs,y=f(xs)),col="black",type="l",lwd=2)
+    if (is.numeric(bottom)){
+      ys=c(bottom,bottom)
+      A=A+lattice::xyplot(y~x,data=data.frame(x=xlim,y=ys),col="black",type="l",lwd=2);
+    }
+    else{
+      A=A+lattice::xyplot(y~x,data=data.frame(x=xs,y=g(xs)),col="black",type="l",lwd=2)
+    }
+  }
+
+
+  return(A)
 }
 
 
