@@ -1,6 +1,7 @@
 #' integrate an expression over a finite interval.  A wrapper for stats::integrate
 #' @param expression  the expression to integrate
 #' @param xlim the interval, as a list, over which to integrate.
+#' @param ... intead of xlim, you may provide a limit that reflects the variable name.  For instance, if the variable is t, then tlim=c(-1,1)
 #' @returns The definite integral requested.
 #' @examples
 #' integrate(x^2~x, xlim=c(-4,4))

@@ -2,6 +2,9 @@
 
 export(.getColor)
 export(Euler)
+export(Reimann.LH)
+export(Reimann.MP)
+export(Reimann.RH)
 export(antiD)
 export(branch_lengths)
 export(contintuous_components)

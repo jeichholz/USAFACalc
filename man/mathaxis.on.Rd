@@ -9,8 +9,7 @@ mathaxis.on(
   col = "black",
   xat = 0,
   yat = 0,
-  xextent = 1e+30,
-  yextent = 1e+30,
+  plot = lattice::trellis.last.object(),
   ...
 )
 }
@@ -23,9 +22,9 @@ mathaxis.on(
 
 \item{yat}{the x-coordinate where the axis will be drawn.}
 
-\item{xextent}{the x-range over which the x-axis will be plotted. If it isn't big enough by default, make it bigger.}
+\item{plot}{the figure to which to add axes.}
 
-\item{yextent}{the y-range over which the x-axis will be plotted. If it isn't big enough by default, make it bigger.}
+\item{...}{additional options that will be passed to}
 }
 \description{
 Plots "traditional" x-y axes.

@@ -4,7 +4,15 @@
 \alias{place.text}
 \title{Places text on a figure.}
 \usage{
-place.text(text, x, y, col = "black", ...)
+place.text(
+  text,
+  x,
+  y,
+  col = "black",
+  zoom = 1,
+  plot = lattice::trellis.last.object(),
+  ...
+)
 }
 \arguments{
 \item{text}{The message to display}
@@ -14,12 +22,18 @@ place.text(text, x, y, col = "black", ...)
 \item{y}{The y-coordinate}
 
 \item{col}{the text color}
+
+\item{zoom}{the factor by which to expand the text.}
+
+\item{plot}{the figure to add the text to.}
+
+\item{...}{additional options that are passed to panel.text.}
 }
 \description{
 Places text on a figure.
 }
 \examples{
 plotFunFill(x^2~x)
-place.text("x^2",1,0.8)
+place.text("x^2",0.5,0.8)
 
 }

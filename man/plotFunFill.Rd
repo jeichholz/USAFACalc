@@ -5,17 +5,19 @@
 \title{Plots a filled region defined by one or two functions.}
 \usage{
 plotFunFill(
-  f,
+  expression,
   bottom = 0,
   xlim = c(0, 1),
   col = "red",
   alpha = 0.5,
   add = FALSE,
+  addoutline = TRUE,
+  plot = lattice::trellis.last.object(),
   ...
 )
 }
 \arguments{
-\item{f}{an expression defining the first function.}
+\item{expression}{an expression defining the first function.}
 
 \item{bottom}{defined the "bottom" of the shaded region. If you give a
 number, then the bottom is just the number. You may also give an expression
@@ -28,6 +30,12 @@ defining a second function to shade the area between two curves.}
 \item{alpha}{the transparency of the shaded region}
 
 \item{add}{whether to add the solid region to current figure or start anew}
+
+\item{addoutline}{whether or not to graph the one/two curves in a highlight black color to make a nice outline.}
+
+\item{plot}{The figure to which this region should be added.}
+
+\item{...}{additional options which are passed to lattice::xyplot}
 }
 \description{
 Plots a filled region defined by one or two functions.
@@ -35,17 +43,13 @@ Plots a filled region defined by one or two functions.
 \examples{
 f=mosaic::makeFun(sin(x)~x)
 plotFunFill(f(x)~x,xlim=c(-3,3))
-#mosaic::plotFun(f(x)~x,col="black",lwd=2,add=TRUE)
-#mosaic::ladd(panel.grid(h=-1,v=-1,col="grey"))
+grid.on(col="grey")
 f=mosaic::makeFun(sin(x)~x)
 plotFunFill(f(x)~x,bottom=-2,xlim=c(-3,3))
-#mosaic::plotFun(f(x)~x,col="black",lwd=2,add=TRUE)
-#mosaic::ladd(panel.grid(h=-1,v=-1,col="grey"))
+grid.on()
 f=mosaic::makeFun(sin(x)~x)
 g=mosaic::makeFun(-x-1/2*cos(5*x)~x)
 plotFunFill(f(x)~x,bottom=g(x)~x,xlim=c(0,3))
-#mosaic::plotFun(f(x)~x,col="black",lwd=2,add=TRUE)
-#mosaic::plotFun(g(x)~x,col="black",lwd=2,add=TRUE)
-#mosaic::ladd(panel.grid(h=-1,v=-1,col="grey"))
+grid.on()
 
 }

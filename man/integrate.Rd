@@ -10,6 +10,8 @@ integrate(expression, xlim = NA, ...)
 \item{expression}{the expression to integrate}
 
 \item{xlim}{the interval, as a list, over which to integrate.}
+
+\item{...}{intead of xlim, you may provide a limit that reflects the variable name.  For instance, if the variable is t, then tlim=c(-1,1)}
 }
 \value{
 The definite integral requested.

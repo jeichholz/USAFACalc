@@ -1,5 +1,5 @@
 #' Plots a filled region defined by one or two functions.
-#' @param f  an expression defining the first function.
+#' @param expression  an expression defining the first function.
 #' @param bottom defined the "bottom" of the shaded region. If you give a
 #' number, then the bottom is just the number. You may also give an expression
 #' defining a second function to shade the area between two curves.
@@ -8,30 +8,28 @@
 #' @param add whether to add the solid region to current figure or start anew
 #' @param xlim the region above which to draw
 #' @param addoutline whether or not to graph the one/two curves in a highlight black color to make a nice outline.
+#' @param ... additional options which are passed to lattice::xyplot
+#' @param plot The figure to which this region should be added.
 #' @examples
 #' f=mosaic::makeFun(sin(x)~x)
 #' plotFunFill(f(x)~x,xlim=c(-3,3))
-#' #mosaic::plotFun(f(x)~x,col="black",lwd=2,add=TRUE)
-#' #mosaic::ladd(panel.grid(h=-1,v=-1,col="grey"))
+#' grid.on(col="grey")
 #' @examples
 #' f=mosaic::makeFun(sin(x)~x)
 #' plotFunFill(f(x)~x,bottom=-2,xlim=c(-3,3))
-#' #mosaic::plotFun(f(x)~x,col="black",lwd=2,add=TRUE)
-#' #mosaic::ladd(panel.grid(h=-1,v=-1,col="grey"))
+#' grid.on()
 #' @examples
 #' f=mosaic::makeFun(sin(x)~x)
 #' g=mosaic::makeFun(-x-1/2*cos(5*x)~x)
 #' plotFunFill(f(x)~x,bottom=g(x)~x,xlim=c(0,3))
-#' #mosaic::plotFun(f(x)~x,col="black",lwd=2,add=TRUE)
-#' #mosaic::plotFun(g(x)~x,col="black",lwd=2,add=TRUE)
-#' #mosaic::ladd(panel.grid(h=-1,v=-1,col="grey"))
+#' grid.on()
 #'
 #' @export
-plotFunFill=function(f,bottom=0,xlim=c(0,1),col="red",alpha=0.5,add=FALSE, addoutline=TRUE, plot=lattice::trellis.last.object(),...){
+plotFunFill=function(expression,bottom=0,xlim=c(0,1),col="red",alpha=0.5,add=FALSE, addoutline=TRUE, plot=lattice::trellis.last.object(),...){
   dots=list(...)
 
   #browser()
-  f=mosaic::makeFun(f)
+  f=mosaic::makeFun(expression)
   N=100
   xs=seq(xlim[[1]],xlim[[2]],length.out=N);
   ys=f(xs);
@@ -50,29 +48,33 @@ plotFunFill=function(f,bottom=0,xlim=c(0,1),col="red",alpha=0.5,add=FALSE, addou
   }
 
 
-
+  #browser()
   #trellis.last.object()+latticeExtra::panel.xyarea(xs,ys,origin=0,data=c(xs=xs,ys=ys))
-  d=data.frame(x=xs,y=ys)
+
   if(add==FALSE){
-    A=lattice::xyplot(y ~ x, data = d, panel = lattice::panel.polygon, xlim=xlim, rule = "none", col=col,alpha=alpha, ...)
+    A=lattice::xyplot(y ~ x, data = data.frame(x=xs,y=ys), panel = lattice::panel.polygon, xlim=xlim, rule = "none", col=col,alpha=alpha, ...)
   }
   else{
-    A=plot+lattice::xyplot(y ~ x, data = d, panel = lattice::panel.polygon,  rule = "none", col=col,alpha=alpha, ...)
+    #A=mosaic::ladd(lattice::panel.polygon(xs,ys,rule = "none", col=col,alpha=alpha,dots),
+    #               data=list(xs=xs,ys=ys,col=col,alpha=alpha,dots=list(...)),plot=plot)
+    A=plot+latticeExtra::layer(lattice::panel.polygon(xs,ys,rule = "none", border="black",col=col,alpha=alpha,dots),data=list(xs=xs,ys=ys,col=col,alpha=alpha,dots=list(...)))
   }
 
   if (addoutline){
     xs=seq(xlim[[1]],xlim[[2]],length.out=N);
-    A=A+lattice::xyplot(y~x,data=data.frame(x=xs,y=f(xs)),col="black",type="l",lwd=2)
+    #browser()
+    ys=f(xs)
+    A=A+latticeExtra::layer(lattice::panel.xyplot(xs,ys,lwd=2,col="black",type="l"),data=list(xs=xs,ys=ys))
     if (is.numeric(bottom)){
+      xs=xlim
       ys=c(bottom,bottom)
-      A=A+lattice::xyplot(y~x,data=data.frame(x=xlim,y=ys),col="black",type="l",lwd=2);
     }
     else{
-      A=A+lattice::xyplot(y~x,data=data.frame(x=xs,y=g(xs)),col="black",type="l",lwd=2)
+      ys=g(xs)
     }
+   A=A+latticeExtra::layer(lattice::panel.xyplot(xs,ys,col="black",type="l",lwd=2),data=list(xs=xs,ys=ys));
+
   }
-
-
   return(A)
 }
 
@@ -82,14 +84,18 @@ plotFunFill=function(f,bottom=0,xlim=c(0,1),col="red",alpha=0.5,add=FALSE, addou
 #' @param x The x-coordinate
 #' @param y The y-coordinate
 #' @param col the text color
+#' @param plot the figure to add the text to.
+#' @param zoom the factor by which to expand the text.
+#' @param ... additional options that are passed to panel.text.
 #' @examples
 #' plotFunFill(x^2~x)
-#' place.text("x^2",1,0.8)
+#' place.text("x^2",0.5,0.8)
 #'
 #' @export
-place.text=function(text,x,y,col="black",...){
+place.text=function(text,x,y,col="black",zoom=1,plot=lattice::trellis.last.object(), ...){
   dots=list(...)
-  return(mosaic::ladd(lattice::panel.text(x=x,y=y,labels=text,col=col,...),data=list(x=x,y=y,text=text,col=col,dots=dots)))
+  cex=zoom
+  return(mosaic::ladd(lattice::panel.text(x=x,y=y,labels=text,alpha=1,cex=cex,col=col),data=list(x=x,y=y,text=text,col=col,cex=cex),plot=plot))
 }
 
 #' Turns on a grid for easier viewing.
@@ -98,35 +104,36 @@ place.text=function(text,x,y,col="black",...){
 #' @param lwd line width, 2 is about right.
 #' @param h # of horizontal grid lines to make, with -1 meaning to just line up to tickmarks.
 #' @param v # of vertical grid lines to make, with -1 meaning to just line up to tickmarks.
-#' @examples
+#' @param plot the figure to which to add the grid.
+#' #@examples
 #' plotFunFill(x^2~x)
 #' grid.on()
 #'
 #' @export
-grid.on=function(h=-1,v=-1,lwd=2,col="black",lty=2,...){
-  return(mosaic::ladd(lattice::panel.grid(h=h,v=v,lty=lty,col=col),data=list(h=h,v=v,lty=lty,col=col)))
+grid.on=function(h=-1,v=-1,lwd=2,col="black",lty=2,plot=lattice::trellis.last.object()){
+
+  return(mosaic::ladd(lattice::panel.grid(h=h,v=v,lty=lty,col=col),data=list(h=h,v=v,lty=lty,col=col),plot=plot))
 }
 
 
 #' Plots "traditional" x-y axes.
-#' @param xextent the x-range over which the x-axis will be plotted. If it isn't big enough by default, make it bigger.
-#' @param yextent the y-range over which the x-axis will be plotted. If it isn't big enough by default, make it bigger.
 #' @param col the color of the axes
 #' @param lwd the line width of the axes
 #' @param xat the y-coordinate where the axis will be drawn.
 #' @param yat the x-coordinate where the axis will be drawn.
+#' @param plot the figure to which to add axes.
+#' @param ... additional options that will be passed to
 #' @examples
 #' f=mosaic::makeFun(sin(x)~x)
 #' plotFunFill(f(x)~x,xlim=c(-3,3))
 #' mathaxis.on()
 #' @export
-mathaxis.on=function(lwd=3,col="black",xat=0,yat=0,xextent=1e30,yextent=1e30,...){
+mathaxis.on=function(lwd=3,col="black",xat=0,yat=0,plot=lattice::trellis.last.object(),...){
   #browser()
-  xlim=c(-xextent,xextent)
-  ylim=c(-yextent,yextent)
-  d=data.frame(x=xlim,y=c(xat,xat));
-  e=data.frame(x=c(yat,yat),y=c(-yextent,yextent));
-  return(lattice::trellis.last.object()+lattice::xyplot(y~x,data=d,panel=lattice::panel.polygon,rule="none",lwd=lwd,col=col,...)+lattice::trellis.last.object()+lattice::xyplot(y~x,data=e,panel=lattice::panel.polygon,rule="none",lwd=lwd,col=col,...))
+  #browser()
+  A=mosaic::ladd(lattice::panel.abline(h=xat,col=col,lwd=lwd,dots),data=list(xat=xat,lwd=lwd,col=col,dots=list(...)),plot=plot)
+  A=mosaic::ladd(lattice::panel.abline(v=yat,lwd=lwd,col=col,dots),data=list(yat=yat,lwd=lwd,col=col,dots=list(...)),plot=A)
+  return(A)
 }
 
 

@@ -4,7 +4,14 @@
 \alias{grid.on}
 \title{Turns on a grid for easier viewing.}
 \usage{
-grid.on(h = -1, v = -1, lwd = 2, col = "black", lty = 2, ...)
+grid.on(
+  h = -1,
+  v = -1,
+  lwd = 2,
+  col = "black",
+  lty = 2,
+  plot = lattice::trellis.last.object()
+)
 }
 \arguments{
 \item{h}{# of horizontal grid lines to make, with -1 meaning to just line up to tickmarks.}
@@ -16,12 +23,12 @@ grid.on(h = -1, v = -1, lwd = 2, col = "black", lty = 2, ...)
 \item{col}{grid color}
 
 \item{lty}{line type, 1,2,or 3 are good options.}
+
+\item{plot}{the figure to which to add the grid.
+#@examples
+plotFunFill(x^2~x)
+grid.on()}
 }
 \description{
 Turns on a grid for easier viewing.
-}
-\examples{
-plotFunFill(x^2~x)
-grid.on()
-
 }
