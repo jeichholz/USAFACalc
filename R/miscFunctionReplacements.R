@@ -28,16 +28,12 @@ integrate=function(expression,xlim=NA,quietly=FALSE,...){
     stop("You must provide an interval to integrate over using xlim=...")
   }
 
-  if (any(is.infinite(xlim))){
-    stop("You must provide finite limits of integration.")
-  }
-
   func=mosaicCore::makeFun(expression);
-  browser()
   ans=stats::integrate(func,xlim[[1]],xlim[[2]])
   if (!quietly){
     print(ans);
   }
+
   return(ans$value)
 }
 
