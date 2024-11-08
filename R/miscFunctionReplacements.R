@@ -38,34 +38,4 @@ integrate=function(expression,xlim=NA,quietly=FALSE,...){
 }
 
 
-#' Calculate an antiderivative, error if no symbolic antiderivative  A wrapper around
-#' mosaicCalc::antiD.
-#' @param tilde  the expression to integrate
-#' @returns A function that is the symbolic antiderivative of tilde. Error if no
-#' symbolic antiderivative found.
-#' @examples
-#' #Succeeds
-#' #antiD(x^2~x)
-#'
-#' #Succeeds
-#' #antiD(cos(2*x)~x)
-#'
-#' #This will fail:
-#' #antiD(dnorm(x)~x)
-#'
-#' #If you really want to use numerical anti differentiation for an antiderivative
-#' #do this instead:
-#' #mosaic::makeFun(integrate(dnorm(s)~s,slim=c(0,x))~x)
-#' @export
-antiD=function(tilde){
 
-  #Call antiD.  This won't fail!
-  F=mosaicCalc::antiD(tilde);
-
-  #If it failed by resorting to a numerical anti derivative, then throw an error.
-  if (grepl("evalFun",paste(deparse(F),collapse=""))){
-    stop("Can't find an anti-derivative. Try numerical antiderivative using integrate().")
-  }
-
-  return(F)
-}
