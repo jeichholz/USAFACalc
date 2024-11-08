@@ -2,6 +2,7 @@
 #' @param expression  the expression to integrate
 #' @param xlim the interval, as a list, over which to integrate.
 #' @param ... intead of xlim, you may provide a limit that reflects the variable name.  For instance, if the variable is t, then tlim=c(-1,1)
+#' @param quietly if TRUE, then don't print the message about possible error.
 #' @returns The definite integral requested.
 #' @examples
 #' integrate(x^2~x, xlim=c(-4,4))
@@ -12,7 +13,7 @@
 #' integrate(t^2~t,tlim=c(0,5))
 #'
 #' @export
-integrate=function(expression,xlim=NA,...){
+integrate=function(expression,xlim=NA,quietly=FALSE,...){
   dots=list(...)
 
   #Find all the variables in the expression.
@@ -32,9 +33,11 @@ integrate=function(expression,xlim=NA,...){
   }
 
   func=mosaicCore::makeFun(expression);
-
+  browser()
   ans=stats::integrate(func,xlim[[1]],xlim[[2]])
-  print(ans);
+  if (!quietly){
+    print(ans);
+  }
   return(ans$value)
 }
 
