@@ -51,8 +51,13 @@ plotFunFill=function(expression,bottom=0,xlim=c(0,1),col="red",alpha=0.5,add=FAL
   #browser()
   #trellis.last.object()+latticeExtra::panel.xyarea(xs,ys,origin=0,data=c(xs=xs,ys=ys))
 
+  var=deparse(mosaicCore::rhs(expression))
+  fnname=deparse(mosaicCore::lhs(expression))
+
   if(add==FALSE){
-    A=lattice::xyplot(y ~ x, data = data.frame(x=xs,y=ys), panel = lattice::panel.polygon, xlim=xlim, rule = "none", col=col,alpha=alpha, ...)
+    A=lattice::xyplot(y ~ x, data = data.frame(x=xs,y=ys),
+                      panel = lattice::panel.polygon, xlim=xlim, rule = "none", col=col,alpha=alpha,xlab=var,
+                      ylab=fnname,...)
   }
   else{
     #A=mosaic::ladd(lattice::panel.polygon(xs,ys,rule = "none", col=col,alpha=alpha,dots),
