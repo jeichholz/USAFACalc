@@ -12,6 +12,8 @@
 #' @export
 antiD=function(expression,...){
 
+
+    tryCatch({
     #Grab the left- and right- sides of the tilde expression.
     lh=mosaicCore::lhs(expression)
     rh=mosaicCore::rhs(expression)
@@ -33,9 +35,11 @@ antiD=function(expression,...){
     #Turn into a string.
     Fstr=caracas::as_character(F);
 
+    failed=FALSE
     #If sympy returned an unevaluted integral, tell the user to give up and use sympy.
     if (grepl("Integral",Fstr)){
-      stop("Can't find an antiderivative.  Use integrate() instead.")
+      warning("Can't find an antiderivative.  Use integrate() instead.")
+      failed=TRUE
     }
 
     #Start creating the R function.  Make a string to evaluate to define it.
@@ -58,7 +62,16 @@ antiD=function(expression,...){
 
     #Create the function, and return.
     eval(str2expression(GDeclaration))
-    return(G)
+    if (!failed){
+      return(G)
+    }
+    },
+    error = function(msg){
+      warning("USAFACalc antiD ran into an error:")
+      warning(paste(msg))
+      warning("Falling back to mosaicCalc antiD")
+      return(antiDFromMosaic(expression,...))
+    })
 
 
 }
