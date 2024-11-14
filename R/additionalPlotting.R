@@ -171,7 +171,7 @@ place.vector=function(offset,base=c(0,0),col="black",lwd=2,plot=lattice::trellis
 #' blank.canvas(xlim=c(0,1),ylim=c(0,1),xlab="This is an axis", ylab="This too")
 #' blank.canvas(xlim=c(0,1),ylim=c(0,1),xlab="This is an axis", ylab="This too",asp=1)
 #' @export
-blank.canvas=function(xlim,ylim,xlab="x",ylab="y",...){
+blank.canvas=function(xlim,ylim,xlab="x",ylab="y", ...){
 
   xs=c(xlim[[1]],xlim[[1]],xlim[[2]],xlim[[2]]);
   ys=c(ylim[[1]],ylim[[2]],ylim[[1]],ylim[[2]])
