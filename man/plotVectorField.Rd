@@ -9,14 +9,13 @@ plotVectorField(
   expression,
   xlim = c(-5, 5),
   ylim = c(-5, 5),
-  grid.by = (xlim[[2]] - xlim[[1]])/19,
-  radius = grid.by * 0.8,
-  col = NA,
-  lwd = 1,
-  lty = 1,
+  N = 20,
+  col = "cadetblue",
+  lwd = 2,
   add = FALSE,
   smooth = FALSE,
-  plot = lattice::trellis.last.object()
+  plot = lattice::trellis.last.object(),
+  ...
 )
 }
 \arguments{
@@ -26,19 +25,17 @@ plotVectorField(
 
 \item{ylim}{the limits of the vertical axis}
 
-\item{grid.by}{the spacing between arrow bases}
-
-\item{radius}{the size of the arrow heads}
+\item{N}{the number of horizontal and vertical rows of arrows to draw}
 
 \item{col}{arrow color}
 
 \item{lwd}{arrow line width}
 
-\item{lty}{arrow line type}
-
 \item{add}{T/F variable indicating whether this should be added to plot}
 
 \item{plot}{the plot to which this should be added, default is the current plot.}
+
+\item{...}{additional arguments to pass to xyplot arrows.}
 }
 \description{
 Plot a vector field
@@ -50,9 +47,9 @@ f=mosaic::makeFun(c(-y,x)~x&y)
 plotVectorField(f(x,y)~x&y, xlim=c(-3,3),ylim=c(-4,4))
 
 #You can set the color, line width, or line type as well.
-plotVectorField(f(x,y)~x&y, xlim=c(-3,3),ylim=c(-4,4),col="green",lwd=3,lty=1)
+plotVectorField(f(x,y)~x&y, xlim=c(-3,3),ylim=c(-4,4),col="green",lwd=3)
 
 #You can add it to other plots if you so choose.
 plotFun(sin(x)~x,xlim=c(0,5))
-plotVectorField(f(x,y)~x&y, xlim=c(-3,3),ylim=c(-4,4),col="green",lwd=3,lty=1,add=TRUE)
+plotVectorField(f(x,y)~x&y, xlim=c(-3,3),ylim=c(-4,4),col="green",lwd=3,add=TRUE)
 }

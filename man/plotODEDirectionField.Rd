@@ -9,11 +9,9 @@ plotODEDirectionField(
   tlim = c(0, 10),
   ylim = c(-5, 5),
   ics = NA,
-  grid.by = (tlim[[2]] - tlim[[1]])/19,
-  radius = grid.by * 0.8,
-  col = NA,
-  lty = 1,
-  lwd = 1,
+  N = 20,
+  col = "black",
+  lwd = 2,
   add = FALSE,
   plot = lattice::trellis.last.object()
 )
@@ -27,13 +25,9 @@ plotODEDirectionField(
 
 \item{ics}{If desired, a list of initial values from which to draw trajectories.}
 
-\item{grid.by}{the spacing between arrow bases}
-
-\item{radius}{the size of the arrow heads}
+\item{N}{the number of horizontal and vertical rows of arrows to draw}
 
 \item{col}{arrow color}
-
-\item{lty}{arrow line type}
 
 \item{lwd}{arrow line width}
 
@@ -61,7 +55,7 @@ Plot a direction field for a scalar ODE
  mosaic::plotPoints(y~t,data=results,add=TRUE)
 
  #You can give an autonomous equation and not specify t as an input.
- plotODEDirectionField(-y*(y-1)~y,tlim=c(0,4),ylim=c(-0.1,2.1),grid.by=0.2)
+ plotODEDirectionField(-y*(y-1)~y,tlim=c(0,4),ylim=c(-0.1,2.1),N=8)
 
  #You can also just plot a vector field and add on trajectories from different initial
  #conditions using the y0s option. Add one initial value for every trajectory you want.

@@ -141,5 +141,41 @@ mathaxis.on=function(lwd=3,col="black",xat=0,yat=0,plot=lattice::trellis.last.ob
   return(A)
 }
 
+#' Places a vector on an already existing figure.  WILL always add to existing figure!
+#' @param offset The vector to plot
+#' @param base The base of the vector
+#' @param col color of the vector
+#' @param lwd width of vector
+#' @param the plot to add to
+#' @param additional arguments to panel.arrows.
+#' @examples
+#' blank.canvas(xlim=c(0,5),ylim=c(0,5))
+#' grid.on()
+#' place.vector(c(1,2),base=c(1,1))
+#'
+#' @export
+place.vector=function(offset,base=c(0,0),col="black",lwd=2,plot=lattice::trellis.last.object(),...){
+  return(mosaic::ladd(lattice::panel.arrows(x0 = base[[1]], y0 = base[[2]],
+                                            x1 = base[[1]]+offset[[1]], y1 = base[[2]]+offset[[2]],
+                                            length=unit(0.15*sqrt(offset[[1]]^2+offset[[2]]^2),"native"),col = col, lwd = lwd, dots),
+                      data=list(base=base,offset=offset,col=col,lwd=lwd,dots=list(...)),plot=plot))
 
+}
+
+#' Create a blank canvas with convenient limits for later use.
+#' @param xlim the x limits
+#' @param ylim the y limits
+#' @param xlab the label to put on the x-axis
+#' @param ylab the label to put on the y-axis.
+#' @param ... additional arguments to pass to lattice::xyplot of particular interest might be asp=1 for setting the aspect ratio of the plot.
+#' blank.canvas(xlim=c(0,1),ylim=c(0,1),xlab="This is an axis", ylab="This too")
+#' blank.canvas(xlim=c(0,1),ylim=c(0,1),xlab="This is an axis", ylab="This too",asp=1)
+#' @export
+blank.canvas=function(xlim,ylim,xlab="x",ylab="y",...){
+
+  xs=c(xlim[[1]],xlim[[1]],xlim[[2]],xlim[[2]]);
+  ys=c(ylim[[1]],ylim[[2]],ylim[[1]],ylim[[2]])
+  return(lattice::xyplot(y~x,data=data.frame(x=xs,y=ys),xlim=xlim,ylim=ylim,col="white",xlab=xlab,ylab=ylab,...))
+
+}
 
