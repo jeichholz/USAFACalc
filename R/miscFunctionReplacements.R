@@ -22,14 +22,19 @@ integrate=function(expression,xlim=NA,quietly=FALSE,...){
   lims <- mosaic::inferArgs(dots = dots, vars = rhsVars, defaults = list(xlim = xlim))
 
   xlim=lims$xlim
+  browser()
 
+  #integrate doesn't accept any arguments that end in lim.  So delete anything that ends in lim from dots, assuming
+  #that it was a limit definition.
+
+  dots[endsWith(names(dots),"lim")]<-NULL
 
   if (any(is.na(xlim))){
     stop("You must provide an interval to integrate over using xlim=...")
   }
 
   func=mosaicCore::makeFun(expression);
-  ans=stats::integrate(func,xlim[[1]],xlim[[2]])
+  ans=do.call(stats::integrate,c(f=func,lower=xlim[[1]],upper=xlim[[2]],dots))
   if (!quietly){
     print(ans);
   }
