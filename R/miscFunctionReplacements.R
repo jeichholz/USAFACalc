@@ -1,7 +1,8 @@
 #' integrate an expression over a finite interval.  A wrapper for stats::integrate
 #' @param expression  the expression to integrate
 #' @param xlim the interval, as a list, over which to integrate.
-#' @param ... intead of xlim, you may provide a limit that reflects the variable name.  For instance, if the variable is t, then tlim=c(-1,1)
+#' @param ... instead of xlim, you may provide a limit that reflects the variable name.  For instance, if the variable is t, then tlim=c(-1,1)
+#' You may also provide additional arguments that are passed to stats::integrate.
 #' @param quietly if TRUE, then don't print the message about possible error.
 #' @returns The definite integral requested.
 #' @examples
@@ -19,18 +20,25 @@ integrate=function(expression,xlim=NA,quietly=FALSE,...){
   #Find all the variables in the expression.
   rhsVars=all.vars(mosaicCore::rhs(expression))
 
+  #Get the limits of integration.  inferArgs lets us accept limits that match the variable name, like tlim or whatever.
   lims <- mosaic::inferArgs(dots = dots, vars = rhsVars, defaults = list(xlim = xlim))
-
   xlim=lims$xlim
-  browser()
+
+  if (any(is.na(xlim))){
+    stop("You must provide an interval to integrate over.")
+  }
+
+
 
   #integrate doesn't accept any arguments that end in lim.  So delete anything that ends in lim from dots, assuming
   #that it was a limit definition.
+  if (length(dots)!=0){
+    dots[endsWith(names(dots),"lim")]<-NULL
+  }
 
-  dots[endsWith(names(dots),"lim")]<-NULL
-
-  if (any(is.na(xlim))){
-    stop("You must provide an interval to integrate over using xlim=...")
+  #Default the max number of subintervals way higher than the stats::integrate default.
+  if (!("subdivisions" %in% names(dots))){
+    dots$subdivisions=1e5
   }
 
   func=mosaicCore::makeFun(expression);

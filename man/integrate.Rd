@@ -13,7 +13,8 @@ integrate(expression, xlim = NA, quietly = FALSE, ...)
 
 \item{quietly}{if TRUE, then don't print the message about possible error.}
 
-\item{...}{intead of xlim, you may provide a limit that reflects the variable name.  For instance, if the variable is t, then tlim=c(-1,1)}
+\item{...}{instead of xlim, you may provide a limit that reflects the variable name.  For instance, if the variable is t, then tlim=c(-1,1)
+You may also provide additional arguments that are passed to stats::integrate.}
 }
 \value{
 The definite integral requested.

@@ -157,7 +157,7 @@ mathaxis.on=function(lwd=3,col="black",xat=0,yat=0,plot=lattice::trellis.last.ob
 place.vector=function(offset,base=c(0,0),col="black",lwd=2,plot=lattice::trellis.last.object(),...){
   return(mosaic::ladd(lattice::panel.arrows(x0 = base[[1]], y0 = base[[2]],
                                             x1 = base[[1]]+offset[[1]], y1 = base[[2]]+offset[[2]],
-                                            length=unit(0.15*sqrt(offset[[1]]^2+offset[[2]]^2),"native"),col = col, lwd = lwd, dots),
+                                            length=grid::unit(0.15*sqrt(offset[[1]]^2+offset[[2]]^2),"native"),col = col, lwd = lwd, dots),
                       data=list(base=base,offset=offset,col=col,lwd=lwd,dots=list(...)),plot=plot))
 
 }
