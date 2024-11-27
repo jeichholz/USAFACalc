@@ -35,6 +35,7 @@
 #' @param verbose if TRUE, print out information about progress.
 #' @param roundDigits if x1 and x2 are found numerically, if x1 and x2 round to the same
 #' number at roundDigits place, then treat x1 and x2 as the same root.
+#' @param complex if TRUE, and the function is polynomial, return complex solutions.
 #' @importFrom grDevices col2rgb rgb topo.colors
 #' @importFrom stats aggregate dist na.exclude rnorm
 #' @importFrom dplyr mutate
@@ -51,7 +52,7 @@
 findZeros=function(expr, ..., xlim = c(near - within, near + within),
                            near = 0, within = Inf, nearest = 10, npts = 1000, iterate = 1,
                            sortBy = c("byx", "byy", "radial"),trySymbolicSingleVar=FALSE,forceMultivariableNumeric=FALSE,
-                          verbose=FALSE,roundDigits=5){
+                          verbose=FALSE,roundDigits=2,complex=FALSE){
 
   #first things first, get the dots arguments.  This is for the purpose of calling the original findZeros,
   #should the sympy method fail.
@@ -102,15 +103,32 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
   #running a polynomial solver, I suppose that the modern way to do things is just call the solver
   #and then hope for the best.
   #
-  #If the function is polynomial then it is my expectation that this will work, possibly returning complex numbers.
+  #If the function is polynomial then it is my expectation that this will work, it won't return complex numbers.
   #There should be no case in which this will return, e.g., null.
-  polynomialSolver=function(func,symbol,symbolName){
+  polynomialSolver=function(func,symbol,symbolName,complex=FALSE){
     if (verbose){
       print('Attempting polynomial solve')
     }
+    #I truly suspect that this will go better if we just have functions of x. We can call whatever later.
+    x=caracas::symbol("x")
+    #If we are dealing with a polynomial, great. If not, error.
+    if (caracas::as_character(caracas::sympy_func(func(x),"is_polynomial"))=="False"){
+      stop("Expression is not a polynomial")
+    }
 
-    sympy_roots=caracas::sympy_func(func(symbol),"nroots");
-    df=data.frame(unlist(lapply(sympy_roots,extractNumberFromSymbolic)));
+
+
+    if (complex){
+      sympy_roots=caracas::sympy_func(func(x),"solve")
+    }
+    else{
+      sympy_roots=caracas::sympy_func(func(x),"real_roots");
+    }
+    #df=data.frame(unlist(lapply(sympy_roots,extractNumberFromSymbolic)));
+    df=data.frame(unlist(lapply(sympy_roots,function(x){extractNumberFromSymbolic(caracas::sympy_func(x,"n"))})))
+    if (length(sympy_roots)==0){
+      df=data.frame(matrix(nrow=0,ncol=1))
+    }
     names(df)=symbolName;
     return(df);
   }
@@ -145,6 +163,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
     if (verbose){
       print("Attempting symbolic system solve")
     }
+    browser()
     sympy_solns=caracas::solve_sys(func(symbols),symbolNames)
     df=data.frame(matrix(NA,nrow=length(sympy_solns),ncol=length(varNames)))
     names(df)=symbolNames;
@@ -397,7 +416,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
   #Here is the actual solving.  Almost all of the above is defining how to do things, not doing them.
 
   #Make a sympy symbol for each variable.
-  varSymbols=lapply(varNames,function(x) {return(caracas::symbol(x))})
+  varSymbols=lapply(varNames,function(x) {return(caracas::symbol(x,real=TRUE))})
 
   numberOfVariables=length(varNames);
   isMultiVariable=numberOfVariables>1;
@@ -424,7 +443,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
   #trySymbolicSingleVariable=T.
   else{
     tryCatch(
-      return(polynomialSolver(pfun,varSymbols,varNames)),
+      return(polynomialSolver(makeFun(expr),varSymbols,varNames,complex=complex)),
       warning=polynomialErrorHandler,
       error=polynomialErrorHandler)
   }

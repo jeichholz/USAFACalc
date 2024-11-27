@@ -17,7 +17,8 @@ findZeros(
   trySymbolicSingleVar = FALSE,
   forceMultivariableNumeric = FALSE,
   verbose = FALSE,
-  roundDigits = 5
+  roundDigits = 2,
+  complex = FALSE
 )
 }
 \arguments{
@@ -60,6 +61,8 @@ a modest number of zeros near \code{near}.}
 
 \item{roundDigits}{if x1 and x2 are found numerically, if x1 and x2 round to the same
 number at roundDigits place, then treat x1 and x2 as the same root.}
+
+\item{complex}{if TRUE, and the function is polynomial, return complex solutions.}
 }
 \description{
 Find a zero of an expression, or system of expressions.
