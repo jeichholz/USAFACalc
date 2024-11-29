@@ -10,10 +10,10 @@ plotVectorField(
   xlim = c(-5, 5),
   ylim = c(-5, 5),
   N = 20,
-  col = "cadetblue",
+  col = "cornflowerblue",
   lwd = 2,
+  normalize = FALSE,
   add = FALSE,
-  smooth = FALSE,
   plot = lattice::trellis.last.object(),
   ...
 )
@@ -30,6 +30,8 @@ plotVectorField(
 \item{col}{arrow color}
 
 \item{lwd}{arrow line width}
+
+\item{normalize}{if true, then plot all vectors as unit length}
 
 \item{add}{T/F variable indicating whether this should be added to plot}
 

@@ -4,6 +4,7 @@
 #' @param xlim the limits of the horizontal axis
 #' @param ylim the limits of the vertical axis
 #' @param N the number of horizontal and vertical rows of arrows to draw
+#' @param normalize if true, then plot all vectors as unit length
 #' @param lwd arrow line width
 #' @param col arrow color
 #' @param add T/F variable indicating whether this should be added to plot
@@ -21,8 +22,8 @@
 #' plotFun(sin(x)~x,xlim=c(0,5))
 #' plotVectorField(f(x,y)~x&y, xlim=c(-3,3),ylim=c(-4,4),col="green",lwd=3,add=TRUE)
 #' @export
-plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cadetblue",lwd=2,
-                           add=FALSE,smooth=FALSE,plot = lattice::trellis.last.object(), ...){
+plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornflowerblue",lwd=2, normalize=FALSE,
+                           add=FALSE,plot = lattice::trellis.last.object(), ...){
 
   #expression should be an expression which takes as input two variables and returns a list of length 2 as output.
 
@@ -49,69 +50,43 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cadetb
   radius=0.8*max(seqx[[2]]-seqx[[1]],seqy[[2]]-seqx[[1]])
 
   grid=expand.grid(seqx,seqy);
-  grid$toVar1=0;
-  grid$toVar2=0;
+  grid$Fx=0;
+  grid$Fy=0;
   grid$Color=col;
-
-  redfunc= function(theta) {floor(255*bump(theta,x0=0,r=2*pi/3))+floor(255*bump(theta,x0=2*pi,r=2*pi/3))};
-  greenfunc=function(theta) {floor(255*bump(theta,x0=2*pi/3,r=2*pi/3))};
-  bluefunc=function(theta) {floor(255*bump(theta,x0=4*pi/3,r=2*pi/3))};
-
 
   for (i in 1:dim(grid)[[1]]){
     x=grid[i,]$Var1;
     y=grid[i,]$Var2;
     vec=FUN(x,y);
-    nrmvec=sqrt(mosaic::dot(vec,vec));
-    if (nrmvec>0){
-      vecN=vec/nrmvec;
-    }
-    else{
-      vecN=vec;
-    }
-
-    slope=vec[[2]]/vec[[1]];
-
-
-    if (is.na(grid[i,]$Color)){
-      if (smooth==TRUE){
-        theta=atan(slope);
-        if (theta<0){theta=2*pi+theta};
-        if (vec[[1]]<0){
-          theta=theta-pi;
-        }
-        cor=ggtern::rgb2hex(redfunc(theta),greenfunc(theta),bluefunc(theta));
-        cat(paste(theta,"\n"))
-        grid[i,]$Color=cor;
-      }
-      else if(is.na(slope)){
-                cor = "black"
-      } else if(slope > 0){
-                cor = "blue"
-      }else if (slope < 0) {
-                cor = "red"
-              }
-      else if(slope == 0) {
-                cor = "green"
-      }
-      grid[i,]$Color=cor;
-    }
-    grid[i,]$toVar1=x+radius*vecN[[1]]
-    grid[i,]$toVar2=y+radius*vecN[[2]]
+    grid$Fx[i]=vec[[1]];
+    grid$Fy[i]=vec[[2]];
   }
 
-  under=FALSE;
+
+  grid$nrm=sqrt(grid$Fx^2+grid$Fy^2)
+  maxrootlen=max(sqrt(grid$nrm));
+
+  if (normalize){
+    grid$displayLen=radius;
+  }
+  else{
+    grid$displayLen=radius*sqrt(grid$nrm)/maxrootlen
+  }
+
+  grid$toVar1=grid$Var1+ifelse(grid$nrm==0,0,grid$displayLen/grid$nrm)*grid$Fx
+  grid$toVar2=grid$Var2+ifelse(grid$nrm==0,0,grid$displayLen/grid$nrm)*grid$Fy
 
   if (!add){
     return(lattice::xyplot(Var2~Var1,panel=function(...){
-      lattice::panel.arrows(x0=grid$Var1,y0=grid$Var2,x1=grid$toVar1,y1=grid$toVar2,length=grid::unit(0.3*radius,"native"),
+      lattice::panel.arrows(x0=grid$Var1,y0=grid$Var2,x1=grid$toVar1,y1=grid$toVar2,length=grid::unit(0.3*grid$displayLen,"native"),
                             col=grid$Color,lwd=lwd,xlab=xlab,ylab=ylab)},
                             data=grid,xlab=allVars[[1]],ylab=allVars[[2]],...))
   }
 
   if (add){
+    under=FALSE;
      return(plot + latticeExtra::layer(do.call(lattice::panel.arrows,
-                                               list(grid$Var1, grid$Var2,grid$toVar1,grid$toVar2,col=grid$Color,length=grid::unit(0.3*radius,"native"),
+                                               list(grid$Var1, grid$Var2,grid$toVar1,grid$toVar2,col=grid$Color,length=grid::unit(0.3*grid$displayLen,"native"),
                                                     lwd=lwd)),data = as.list(environment()), under = under))
   }
 
@@ -174,7 +149,7 @@ plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),ics=NA, N=20
   dydt=mosaicCore::makeFun(expression);
   dydt1=mosaicCore::makeFun(c(1,dydt(t,y))~t&y)
 
-  A=plotVectorField(dydt1(t,y)~t&y,xlim=tlim,ylim=ylim,N=N,col=col,lwd=lwd,add=add,plot=plot)
+  A=plotVectorField(dydt1(t,y)~t&y,xlim=tlim,ylim=ylim,N=N,col=col,lwd=lwd,add=add,normalize=TRUE,plot=plot)
 
   if (!any(is.na(y0s))){
     for (y0 in y0s){

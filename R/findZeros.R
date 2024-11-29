@@ -163,7 +163,6 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
     if (verbose){
       print("Attempting symbolic system solve")
     }
-    browser()
     sympy_solns=caracas::solve_sys(func(symbols),symbolNames)
     df=data.frame(matrix(NA,nrow=length(sympy_solns),ncol=length(varNames)))
     names(df)=symbolNames;
@@ -443,7 +442,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
   #trySymbolicSingleVariable=T.
   else{
     tryCatch(
-      return(polynomialSolver(makeFun(expr),varSymbols,varNames,complex=complex)),
+      return(polynomialSolver(mosaic::makeFun(expr),varSymbols,varNames,complex=complex)),
       warning=polynomialErrorHandler,
       error=polynomialErrorHandler)
   }
