@@ -6,13 +6,13 @@
 #' @inheritParams mosaic::plotFun
 #' @export
 plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NULL,
-          under = FALSE, xlim = NULL, ylim = NULL, npts = NULL, ylab = NULL,
-          xlab = NULL, zlab = NULL, filled = TRUE, levels = NULL,
-          nlevels = 10, labels = TRUE, surface = FALSE, groups = NULL,
-          col = lattice::trellis.par.get("superpose.line")$col, col.regions = topo.colors,
-          type = "l", lwd = lattice::trellis.par.get("superpose.line")$lwd,
-          lty = lattice::trellis.par.get("superpose.line")$lty, alpha = NULL,
-          discontinuities = NULL, discontinuity = 1, interactive = mosaic::rstudio_is_available())
+                   under = FALSE, xlim = NULL, ylim = NULL, npts = NULL, ylab = NULL,
+                   xlab = NULL, zlab = NULL, filled = TRUE, levels = NULL,
+                   nlevels = 10, labels = TRUE, surface = FALSE, groups = NULL,
+                   col = lattice::trellis.par.get("superpose.line")$col, col.regions = topo.colors,
+                   type = "l", lwd = lattice::trellis.par.get("superpose.line")$lwd,
+                   lty = lattice::trellis.par.get("superpose.line")$lty, alpha = NULL,
+                   discontinuities = NULL, discontinuity = 1, interactive = mosaic::rstudio_is_available())
 {
   if (is.function(object)) {
     formula <- f(x) ~ x
@@ -56,7 +56,7 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
     rowAsList <- as.list(paramGrid[r, ])
     names(rowAsList) <- otherVars
     fList <- c(fList, do.call(mosaicCore::makeFun, c(object, c(dots,
-                                                     rowAsList, strict.declaration = FALSE, envir = parent.frame()))))
+                                                               rowAsList, strict.declaration = FALSE, envir = parent.frame()))))
   }
   if (add) {
     if (ndims == 1) {
@@ -89,10 +89,10 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
     if (is.null(limits$xlim) || length(limits$xlim) < 2) {
       zeros <- c()
       tryCatch(zeros <- mosaic::findZeros(object, nearest = 6,
-                                  ...)[[1]], error = function(e) {
-                                    e
-                                  }, warning = function(e) {
-                                  })
+                                          ...)[[1]], error = function(e) {
+                                            e
+                                          }, warning = function(e) {
+                                          })
       limits$xlim <- switch(as.character(length(zeros)),
                             `0` = c(0, 1), `1` = c(-1.5, 1.5) * (zeros +
                                                                    ifelse(zeros == 0, 1, 0)), c(-0.1, 0.1) *
@@ -106,16 +106,16 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
       seq(base::min(limits$xlim), base::max(limits$xlim),
           length.out = npts)
     else mosaic::adapt_seq(base::min(limits$xlim), base::max(limits$xlim),
-                   f = function(xxqq) {
-                     .f.(xxqq)
-                   }, length.out = npts, quiet = TRUE)
+                           f = function(xxqq) {
+                             .f.(xxqq)
+                           }, length.out = npts, quiet = TRUE)
     .yvals <- c()
     for (.f. in fList) .yvals <- c(.yvals, sapply(.xvals,
                                                   .f.))
     localData <- data.frame(x = .xvals, y = .yvals, component = contintuous_components(.xvals,
                                                                                        .yvals, adjust = discontinuity))
     localData$alone <- mosaicCore::ediff(localData$component) * mosaicCore::ediff(localData$component,
-                                                          pad = "tail") != 0
+                                                                                  pad = "tail") != 0
     localData <- localData[!localData$alone, ]
     localData <- data.frame(x = range(localData$x, na.rm = TRUE,
                                       fintie = TRUE), y = range(localData$y, na.rm = TRUE,
@@ -198,15 +198,19 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
                                                               step = 0.01, initial = 0.2, label = "Distance"))
         #Create a plotly surface plot and print it, it looks better. By doing it last, if this is working, then the Viewer tab should be
         #the one that the student sees by default.
-        fig <- plotly::plot_ly(x=.xvals,y=.yvals,z=zvals,
+        fig <- plotly::plot_ly(x=.xvals,y=.yvals,z=t(zvals),
                                contours = list(
+                                 x=list(show=TRUE,highlight=FALSE,color="gray8"),
+                                 y=list(show=TRUE,highlight=FALSE,color="gray8"),
                                  z = list(
-                                   show=TRUE,
+                                   show=FALSE,
                                    usecolormap=TRUE,
-                                   highlightcolor="black",
-                                   project=list(z=TRUE)
-                                 )
-                               )) %>% plotly::add_surface()
+                                   highlightcolor="black",project=list(z=TRUE)
+                                 )),
+                               lighting=list(ambient=0.7,specular=0.5),hoverinfo="none",
+        ) %>%
+          plotly::layout(scene=list(xaxis=list(title=xlab),yaxis=list(title=ylab),zaxis=list(title=zlab))) %>%
+          plotly::add_surface()
         print(fig)
 
 
@@ -216,11 +220,11 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
       }
       else {
         return((lattice::wireframe(height ~ Var1 + Var2, xlab = xlab,
-                          ylab = ylab, zlab = list(zlab, rot = 90),
-                          data = grid, groups = eval(substitute(groups),
-                                                     localData), drape = filled, shade = FALSE,
-                          colorkey = FALSE, col.regions = zcolors, at = zcuts,
-                          ...)))
+                                   ylab = ylab, zlab = list(zlab, rot = 90),
+                                   data = grid, groups = eval(substitute(groups),
+                                                              localData), drape = filled, shade = FALSE,
+                                   colorkey = FALSE, col.regions = zcolors, at = zcuts,
+                                   ...)))
       }
     }
     else {
@@ -248,10 +252,10 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
       }
       if (add) {
         return(mosaic::ladd(panel.usafacalc.levelcontourplot(grid$Var1,
-                                           grid$Var2, grid$height, subscripts = 1, at = levels,
-                                           labels = labels, filled = filled, groups = eval(substitute(groups),
-                                                                                           localData), col.regions = col.regions, contour = TRUE,
-                                           region = FALSE, lwd=lwd, col=col,lty=lty, ...)))
+                                                             grid$Var2, grid$height, subscripts = 1, at = levels,
+                                                             labels = labels, filled = filled, groups = eval(substitute(groups),
+                                                                                                             localData), col.regions = col.regions, contour = TRUE,
+                                                             region = FALSE, lwd=lwd, col=col,lty=lty, ...)))
       }
       return((funPlot.draw.contour(grid$Var1, grid$Var2,
                                    grid$height, xlab = xlab, ylab = ylab, at = levels,
@@ -327,20 +331,20 @@ branch_lengths <- function(x, y, discontinuities = NULL, discontinuity = 1) {
 
 #' @export
 panel.usafacalc.plotFun1 <- function( ..f.., ...,
-                            x, y,
-                            type="l",
-                            lwd = lattice::trellis.par.get("superpose.line")$lwd,
-                            lty = lattice::trellis.par.get("superpose.line")$lty,
-                            col = lattice::trellis.par.get('superpose.line')$col,
-                            npts=NULL,
-                            zlab=NULL,
-                            filled=TRUE,
-                            levels=NULL,
-                            nlevels=10,
-                            surface=FALSE,
-                            alpha=NULL,
-                            discontinuity = NULL,
-                            discontinuities = NULL) {
+                                      x, y,
+                                      type="l",
+                                      lwd = lattice::trellis.par.get("superpose.line")$lwd,
+                                      lty = lattice::trellis.par.get("superpose.line")$lty,
+                                      col = lattice::trellis.par.get('superpose.line')$col,
+                                      npts=NULL,
+                                      zlab=NULL,
+                                      filled=TRUE,
+                                      levels=NULL,
+                                      nlevels=10,
+                                      surface=FALSE,
+                                      alpha=NULL,
+                                      discontinuity = NULL,
+                                      discontinuities = NULL) {
   dots <- list(...)
 
   if (is.function(..f..) ) ..f.. <- list(..f..)
@@ -383,9 +387,9 @@ panel.usafacalc.plotFun1 <- function( ..f.., ...,
         seq(base::min(parent.xlim), base::max(parent.xlim), length.out=npts)
       else
         mosaic::adapt_seq(base::min(parent.xlim), base::max(parent.xlim),
-                  f=function(xxqq){ .f.(xxqq) },
-                  length.out=npts,
-                  quiet=TRUE)
+                          f=function(xxqq){ .f.(xxqq) },
+                          length.out=npts,
+                          quiet=TRUE)
 
       .yvals <- suppressWarnings( sapply( .xvals, .f. ) )
     }
@@ -426,20 +430,20 @@ panel.usafacalc.plotFun1 <- function( ..f.., ...,
 
 #' @export
 panel.usafacalc.plotFun1a <- function( ..f.., ...,
-                             x, y,
-                             type="l",
-                             col = lattice::trellis.par.get('superpose.line')$col,
-                             lwd = lattice::trellis.par.get("superpose.line")$lwd,
-                             lty = lattice::trellis.par.get("superpose.line")$lty,
-                             npts=NULL,
-                             zlab=NULL,
-                             filled=TRUE,
-                             levels=NULL,
-                             nlevels=10,
-                             surface=FALSE,
-                             alpha=NULL,
-                             discontinuity = NULL,
-                             discontinuities = NULL) {
+                                       x, y,
+                                       type="l",
+                                       col = lattice::trellis.par.get('superpose.line')$col,
+                                       lwd = lattice::trellis.par.get("superpose.line")$lwd,
+                                       lty = lattice::trellis.par.get("superpose.line")$lty,
+                                       npts=NULL,
+                                       zlab=NULL,
+                                       filled=TRUE,
+                                       levels=NULL,
+                                       nlevels=10,
+                                       surface=FALSE,
+                                       alpha=NULL,
+                                       discontinuity = NULL,
+                                       discontinuities = NULL) {
   dots <- list(...)
 
   if (is.function(..f..) ) ..f.. <- list(..f..)
@@ -485,9 +489,9 @@ panel.usafacalc.plotFun1a <- function( ..f.., ...,
         seq(base::min(parent.xlim), base::max(parent.xlim), length.out=npts)
       else
         mosaic::adapt_seq(base::min(parent.xlim), base::max(parent.xlim),
-                  f=function(xxqq){ .f.(xxqq) },
-                  length.out=npts,
-                  quiet=TRUE)
+                          f=function(xxqq){ .f.(xxqq) },
+                          length.out=npts,
+                          quiet=TRUE)
 
       tryCatch(.yvals <- sapply( .xvals, .f. ), warning=function(w) {} )
     }
@@ -546,20 +550,20 @@ panel.usafacalc.plotFun1a <- function( ..f.., ...,
 
 #' @export
 panel.usafacalc.plotFun <- function( object, ...,
-                           type="l",
-                           npts=NULL,
-                           zlab=NULL,
-                           filled=TRUE,
-                           levels=NULL,
-                           nlevels=10,
-                           surface=FALSE,
-                           col.regions =topo.colors,
-                           lwd = lattice::trellis.par.get("superpose.line")$lwd,
-                           lty = lattice::trellis.par.get("superpose.line")$lty,
-                           col = lattice::trellis.par.get("superpose.line")$col,
-                           alpha=NULL,
-                           discontinuity = NULL,
-                           discontinuities = NULL ) {
+                                     type="l",
+                                     npts=NULL,
+                                     zlab=NULL,
+                                     filled=TRUE,
+                                     levels=NULL,
+                                     nlevels=10,
+                                     surface=FALSE,
+                                     col.regions =topo.colors,
+                                     lwd = lattice::trellis.par.get("superpose.line")$lwd,
+                                     lty = lattice::trellis.par.get("superpose.line")$lty,
+                                     col = lattice::trellis.par.get("superpose.line")$col,
+                                     alpha=NULL,
+                                     discontinuity = NULL,
+                                     discontinuities = NULL ) {
   dots <- list(...)
   if ( is.function(object) ) {
     formula <- f(x) ~ x
@@ -598,9 +602,9 @@ panel.usafacalc.plotFun <- function( object, ...,
         seq(base::min(parent.xlim), base::max(parent.xlim), length.out=npts)
     else
       mosaic::adapt_seq(base::min(parent.xlim), base::max(parent.xlim),
-                f=function(xxqq){ ..f..(xxqq) },
-                length.out=npts,
-                quiet=TRUE)
+                        f=function(xxqq){ ..f..(xxqq) },
+                        length.out=npts,
+                        quiet=TRUE)
     .yvals <- tryCatch( sapply( .xvals, ..f.. ),
                         warning=function(w) {} )
 
@@ -665,11 +669,11 @@ panel.usafacalc.plotFun <- function( object, ...,
     if(is.null(levels)) levels=pretty(grid$height, nlevels)
 
     return( panel.usafacalc.levelcontourplot(x = grid$Var1, y = grid$Var2, z = grid$height,
-                                   subscripts = 1:nrow(grid),
-                                   at = levels,
-                                   col.regions = fillcolors,
-                                   filled=filled, lwd=lwd,lty=lty,col=col,
-                                   ...
+                                             subscripts = 1:nrow(grid),
+                                             at = levels,
+                                             col.regions = fillcolors,
+                                             filled=filled, lwd=lwd,lty=lty,col=col,
+                                             ...
 
     )
     )
@@ -756,17 +760,17 @@ inferArgs <- function( vars, dots, defaults=alist(xlim=, ylim=, zlim=), variants
 
 #' @export
 panel.usafacalc.levelcontourplot <- function(x, y, z, subscripts=1,
-                                   at, shrink, labels = TRUE,
-                                   label.style = c("mixed","flat","align"),
-                                   contour = FALSE,
-                                   region = TRUE,
-                                   col = add.line$col,
-                                   lty = add.line$lty,
-                                   lwd = add.line$lwd,
-                                   border = "transparent", ...,
-                                   col.regions = regions$col,
-                                   filled=TRUE,
-                                   alpha.regions = regions$alpha
+                                             at, shrink, labels = TRUE,
+                                             label.style = c("mixed","flat","align"),
+                                             contour = FALSE,
+                                             region = TRUE,
+                                             col = add.line$col,
+                                             lty = add.line$lty,
+                                             lwd = add.line$lwd,
+                                             border = "transparent", ...,
+                                             col.regions = regions$col,
+                                             filled=TRUE,
+                                             alpha.regions = regions$alpha
 )
 {
   add.line <- lattice::trellis.par.get('add.line')
