@@ -196,36 +196,36 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
                                                               step = 5, initial = 30, label = "Elevation"),
                                     dist = manipulate::slider(min = 0, max = 1,
                                                               step = 0.01, initial = 0.2, label = "Distance"))
-        #Create a plotly surface plot and print it, it looks better. By doing it last, if this is working, then the Viewer tab should be
-        #the one that the student sees by default.
-        fig <- plotly::plot_ly(x=.xvals,y=.yvals,z=t(zvals),
-                               contours = list(
-                                 x=list(show=TRUE,highlight=FALSE,color="gray8"),
-                                 y=list(show=TRUE,highlight=FALSE,color="gray8"),
-                                 z = list(
-                                   show=FALSE,
-                                   usecolormap=TRUE,
-                                   highlightcolor="black",project=list(z=TRUE)
-                                 )),
-                               lighting=list(ambient=0.7,specular=0.5),hoverinfo="none",
-        ) %>%
-          plotly::layout(scene=list(xaxis=list(title=xlab),yaxis=list(title=ylab),zaxis=list(title=zlab))) %>%
-          plotly::add_surface()
-        print(fig)
-
-
-        #return(fig)
-        #return the original, just in case that is important in some way.
-        return(fig0);
+        #But print, don't return
+        print(fig0)
       }
       else {
-        return((lattice::wireframe(height ~ Var1 + Var2, xlab = xlab,
+        print((lattice::wireframe(height ~ Var1 + Var2, xlab = xlab,
                                    ylab = ylab, zlab = list(zlab, rot = 90),
                                    data = grid, groups = eval(substitute(groups),
                                                               localData), drape = filled, shade = FALSE,
                                    colorkey = FALSE, col.regions = zcolors, at = zcuts,
                                    ...)))
       }
+
+      #Create a plotly surface plot and print it, it looks better. By doing it last, if this is working, then the Viewer tab should be
+      #the one that the student sees by default.
+      fig <- plotly::plot_ly(x=.xvals,y=.yvals,z=t(zvals),
+                             contours = list(
+                               x=list(show=TRUE,highlight=FALSE,color="gray8"),
+                               y=list(show=TRUE,highlight=FALSE,color="gray8"),
+                               z = list(
+                                 show=FALSE,
+                                 usecolormap=TRUE,
+                                 highlightcolor="black",project=list(z=TRUE)
+                               )),
+                             lighting=list(ambient=0.7,specular=0.5),hoverinfo="none") %>%
+        plotly::layout(scene=list(xaxis=list(title=xlab),yaxis=list(title=ylab),zaxis=list(title=zlab))) %>%
+        plotly::add_surface()
+      return(fig)
+
+
+
     }
     else {
       funPlot.draw.contour <- function(x, y, z, ncontours = 6,
