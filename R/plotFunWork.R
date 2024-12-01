@@ -210,17 +210,17 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
 
       #Create a plotly surface plot and print it, it looks better. By doing it last, if this is working, then the Viewer tab should be
       #the one that the student sees by default.
-      fig <- plotly::plot_ly(x=.xvals,y=.yvals,z=t(zvals),
+      fig <- plotly::plot_ly(x=.xvals,y=.yvals,z=t(zvals), showscale=FALSE,
                              contours = list(
-                               x=list(show=TRUE,highlight=FALSE,color="gray8"),
-                               y=list(show=TRUE,highlight=FALSE,color="gray8"),
+                               x=list(show=TRUE,highlight=FALSE,color="gray8",start=min(.xvals),end=max(.xvals),size=(max(.xvals)-min(.xvals))/20),
+                               y=list(show=TRUE,highlight=FALSE,color="gray8",start=min(.yvals),end=max(.yvals),size=(max(.yvals)-min(.yvals))/20),
                                z = list(
                                  show=FALSE,
                                  usecolormap=TRUE,
                                  highlightcolor="black",project=list(z=TRUE)
                                )),
                              lighting=list(ambient=0.7,specular=0.5),hoverinfo="none") %>%
-        plotly::layout(scene=list(xaxis=list(title=xlab),yaxis=list(title=ylab),zaxis=list(title=zlab))) %>%
+        plotly::layout(scene=list(xaxis=list(title=xlab),yaxis=list(title=ylab),zaxis=list(title=zlab),aspectmode='cube')) %>%
         plotly::add_surface()
       return(fig)
 
