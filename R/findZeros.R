@@ -159,15 +159,24 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
   #This is a symbolic solver for systems of equations.  It relies on the symbolic solver from sympy.
   #As such, it might miss solutions, just like the symbolic general solver.  Indeed, there is almost zero difference between the two.
   #We might consider a numerical system solver as an alternative, but we'll give this a go for now.
-  symbolicSystemSolver=function(func,symbols,symbolNames){
+  symbolicSystemSolver=function(func,symbols,symbolNames,complex=FALSE){
     if (verbose){
       print("Attempting symbolic system solve")
     }
+
     sympy_solns=caracas::solve_sys(func(symbols),symbolNames)
     df=data.frame(matrix(NA,nrow=length(sympy_solns),ncol=length(varNames)))
     names(df)=symbolNames;
-    for (v in names(df)){
-      df[[v]] =  unlist(lapply(sympy_solns,function(x){extractNumberFromSymbolic(x[[v]])}))
+    if (nrow(df)>0){
+      for (v in names(df)){
+        df[[v]] =  unlist(lapply(sympy_solns,function(x){extractNumberFromSymbolic(caracas::sympy_func(x[[v]],"n"))}))
+      }
+
+      if (!complex){
+        imagTol=1e-10  #Just drop the imaginary part of the number if it is less than 1e-10, assume it is roundoff error.
+        df=filter_all(df, all_vars(abs(Im(.)) < imagTol)) #Keep only rows that have all small imaginary parts
+        df=mutate_all(df,Re)
+      }
     }
     return(df);
   }
@@ -429,7 +438,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
     }
     else{
       tryCatch({
-        return(symbolicSystemSolver(pfun,varSymbols,varNames))
+        return(symbolicSystemSolver(pfun,varSymbols,varNames,complex=complex))
       },
       error=function(e){
         print("multivariable symbolic solve failed. Attempting numeric solve.")
