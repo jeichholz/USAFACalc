@@ -75,7 +75,7 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
                                                      discontinuities = discontinuities, filled = filled,
                                                      levels = levels, nlevels = nlevels, suface = surface,
                                                      col.regions = col.regions, type = type, alpha = alpha,
-                                                     lwd = lwd, lty = lty,col=col), dots)), data = as.list(environment()),
+                                                     lwd = lwd, lty = lty,col=col,labels=labels), dots)), data = as.list(environment()),
                                       under = under))
   }
   limits <- inferArgs(dots = dots, vars = rhsVars, defaults = list(xlim = xlim,

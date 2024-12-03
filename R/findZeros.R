@@ -174,8 +174,8 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
 
       if (!complex){
         imagTol=1e-10  #Just drop the imaginary part of the number if it is less than 1e-10, assume it is roundoff error.
-        df=filter_all(df, all_vars(abs(Im(.)) < imagTol)) #Keep only rows that have all small imaginary parts
-        df=mutate_all(df,Re)
+        df=dplyr::filter_all(df, dplyr::all_vars(abs(Im(.)) < imagTol)) #Keep only rows that have all small imaginary parts
+        df=dplyr::mutate_all(df,Re)
       }
     }
     return(df);
