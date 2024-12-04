@@ -50,8 +50,8 @@
 #'
 #' @export
 findZeros=function(expr, ..., xlim = c(near - within, near + within),
-                           near = 0, within = Inf, nearest = 10, npts = 1000, iterate = 1,
-                           sortBy = c("byx", "byy", "radial"),trySymbolicSingleVar=FALSE,forceMultivariableNumeric=FALSE,
+                           near = 0, within = 100, nearest = 10, npts = 1e4, iterate = 1,
+                           sortBy = c("byx", "byy", "radial"),trySymbolicSingleVar=FALSE,forceMultivariableNumeric=TRUE,
                           verbose=FALSE,roundDigits=2,complex=FALSE){
 
   #first things first, get the dots arguments.  This is for the purpose of calling the original findZeros,
@@ -163,7 +163,6 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
     if (verbose){
       print("Attempting symbolic system solve")
     }
-
     sympy_solns=caracas::solve_sys(func(symbols),symbolNames)
     df=data.frame(matrix(NA,nrow=length(sympy_solns),ncol=length(varNames)))
     names(df)=symbolNames;
@@ -307,9 +306,8 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
   }
 
 
-  multiVariableNumericSolver=function(func,varnames,near=rep(0,length(varnames)),within=Inf,npts=1000){
-
-    numVars=length(varnames);
+  multiVariableNumericSolver=function(func,varnames,near=rep(0,length(varnames)),within=100,npts=100000){
+     numVars=length(varnames);
 
       #if near happens to be a scalar, fix it for the user.
       if (length(near)==1){
@@ -343,11 +341,15 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
 
       #Create a matrix of initial guesses.  One row per guess.
       #Each variable is normally distributed with mean at "near" and standard deviation within[[i]]/3
-      x0=matrix(0,npts,numVars);
 
-      for (i in 1:numVars){
-        x0[,i]=rnorm(npts,near[[i]],within[[i]]/2)
+      dim=numVars;
+      nodesPerDim=(round(npts^(1/dim)));
+      nodeList=list()
+
+     for (i in 1:numVars){
+        nodeList[[i]]=seq(near[[i]]-within[[i]], near[[i]]+within[[i]],length.out=nodesPerDim)
       }
+      x0=expand.grid(nodeList)
 
       #Where are the initial guesses?
       #if (numVars==2){
@@ -359,7 +361,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
       #}
 
       #Ok, now use searchZeros to run a search from each starting point.
-      nlsolv.solns=nleqslv::searchZeros(x0,func,digits=roundDigits);
+      nlsolv.solns=nleqslv::searchZeros(as.matrix(x0),func,digits=roundDigits);
       solns=data.frame(data=matrix(nrow=0,ncol=numVars));
 
       solns=rbind(solns,nlsolv.solns$x);
@@ -433,7 +435,9 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
   #If the system is multivariable, first try the symbolic solver, then numeric. go straight to numeric if forceMultivariableNumeric=TRUE
   if (isMultiVariable){
     if (forceMultivariableNumeric){
-      print("Attempting multivariable numeric solve -- forced to do so")
+      if (verbose){
+        print("Attempting multivariable numeric solve -- forced to do so")
+      }
       return(multiVariableNumericSolver(pfun,varNames,near,within,npts))
     }
     else{
