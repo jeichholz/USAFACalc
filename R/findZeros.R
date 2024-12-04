@@ -375,6 +375,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
       }
 
       names(solns)=varNames;
+      solns=round(solns,digits=roundDigits)
       return(solns)
 
 
