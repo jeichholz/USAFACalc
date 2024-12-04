@@ -351,6 +351,26 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
       }
       x0=expand.grid(nodeList)
 
+      #Filter out initial guesses for which f is inf or na
+      #z is a function that takes arguments like x,y,z, puts them in a vector, and evaluates func on the vector.
+      #undoing the vectorification we originally did ...
+      z=function(...) func(c(...))
+
+      #apply f to each row of x0, using the z function.
+      fx0=apply(x0,1,z)
+
+      #fx0 is transposed for some reason. transpose it, adjoin it to x0.
+      x0=cbind(x0,t(fx0))
+
+      #keep only rows that have no nas
+      x0 = dplyr::filter_all(x0,dplyr::all_vars(!is.na(.)))
+
+      #keep only rows that have no infs.
+      x0 = dplyr::filter_all(x0,dplyr::all_vars(!is.infinite(.)))
+
+      #drop the new columns.
+      x0=x0[1:numVars]
+
       #Where are the initial guesses?
       #if (numVars==2){
       #  plot(data.frame(x0))
