@@ -52,7 +52,7 @@
 findZeros=function(expr, ..., xlim = c(near - within, near + within),
                            near = 0, within = 100, nearest = 10, npts = 1e4, iterate = 1,
                            sortBy = c("byx", "byy", "radial"),trySymbolicSingleVar=FALSE,forceMultivariableNumeric=TRUE,
-                          verbose=FALSE,roundDigits=2,complex=FALSE){
+                          verbose=FALSE,roundDigits=3,complex=FALSE){
 
   #first things first, get the dots arguments.  This is for the purpose of calling the original findZeros,
   #should the sympy method fail.
@@ -298,6 +298,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
       roots = roots %>% mutate(rounded_value=round(roots,roundDigits))
       roots= roots %>% aggregate(by=list(roots$rounded_value),FUN=mean)
       roots=data.frame(roots$roots)
+      roots=round(roots,digits=roundDigits)
     }
 
     #Finally, stick the correct column name on there.
