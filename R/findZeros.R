@@ -356,8 +356,9 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
       #undoing the vectorification we originally did ...
       z=function(...) func(c(...))
 
+
       #apply f to each row of x0, using the z function.
-      fx0=apply(x0,1,z)
+      fx0=suppressWarnings(apply(x0,1,z))
 
       #fx0 is transposed for some reason. transpose it, adjoin it to x0.
       x0=cbind(x0,t(fx0))
@@ -381,7 +382,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
       #}
 
       #Ok, now use searchZeros to run a search from each starting point.
-      nlsolv.solns=nleqslv::searchZeros(as.matrix(x0),func,digits=roundDigits);
+      nlsolv.solns=suppressWarnings(nleqslv::searchZeros(as.matrix(x0),func,digits=roundDigits));
       solns=data.frame(data=matrix(nrow=0,ncol=numVars));
 
       solns=rbind(solns,nlsolv.solns$x);
