@@ -112,7 +112,7 @@ place.text=function(text,x,y,col="black",zoom=1,plot=lattice::trellis.last.objec
 #' in the vector.
 #' @param v Same as for h, but for vertical lines.
 #' @param plot the figure to which to add the grid.
-#' #@examples
+#' @examples
 #' plotFunFill(x^2~x)
 #' grid.on()
 #'

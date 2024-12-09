@@ -26,8 +26,12 @@ in the vector.}
 
 \item{lty}{line type, 1,2,or 3 are good options.}
 
-\item{plot}{the figure to which to add the grid.
-#@examples
+\item{plot}{the figure to which to add the grid.}
+}
+\description{
+Turns on a grid on your plot.
+}
+\examples{
 plotFunFill(x^2~x)
 grid.on()
 
@@ -41,8 +45,5 @@ grid.on(h=c(0.5,1,1.5,2,2.5,3,3.5,4),v=c(-1.5,-1,-0.5,0,0.5,1,1.5))
 
 #Do the example above, but more concisely using the seq command.
 plotFunFill(x^2~x,xlim=c(-2,2))
-grid.on(h=seq(0,4,by=0.5),v=seq(-2,2,by=0.5))}
-}
-\description{
-Turns on a grid on your plot.
+grid.on(h=seq(0,4,by=0.5),v=seq(-2,2,by=0.5))
 }
