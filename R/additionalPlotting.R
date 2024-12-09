@@ -84,7 +84,7 @@ plotFunFill=function(expression,bottom=0,xlim=c(0,1),col="red",alpha=0.5,add=FAL
 }
 
 
-#' Places text on a figure.
+#' Places text on a figure.  Supports some latex symbols, but backslashes must be double backslashes.
 #' @param text The message to display
 #' @param x The x-coordinate
 #' @param y The y-coordinate
@@ -96,11 +96,20 @@ plotFunFill=function(expression,bottom=0,xlim=c(0,1),col="red",alpha=0.5,add=FAL
 #' plotFunFill(x^2~x)
 #' place.text("x^2",0.5,0.8)
 #'
+#' plotFun(pnorm(x)~x,xlim=c(-3,3),lwd=2)
+#' mathaxis.on()
+#' plotFunFill(pnorm(x)~x,xlim=c(-3,1.1),col='magenta',add=TRUE)
+#' place.text("$x$",1.1,-0.04,cex=1.3)
+#' place.text("$\\int_{-\\infty}^x \\frac{1}{\\sqrt{2\\pi}} e^{-\\frac{x^2}{2}}\\,dx$",0.5,0.3,cex=1.4)
 #' @export
-place.text=function(text,x,y,col="black",zoom=1,plot=lattice::trellis.last.object(), ...){
+place.text=function(text,x,y,col="black",zoom=1,plot=lattice::trellis.last.object(),tex=TRUE, ...){
   dots=list(...)
+  if (tex){
+    text=latex2exp::TeX(text)
+  }
   cex=zoom
-  return(mosaic::ladd(lattice::panel.text(x=x,y=y,labels=text,alpha=1,cex=cex,col=col),data=list(x=x,y=y,text=text,col=col,cex=cex),plot=plot))
+  return(mosaic::ladd(lattice::panel.text(x=x,y=y,labels=text,alpha=1,cex=cex,col=col),
+                      data=list(x=x,y=y,text=text,col=col,cex=cex),plot=plot))
 }
 
 #' Turns on a grid on your plot.
@@ -113,6 +122,7 @@ place.text=function(text,x,y,col="black",zoom=1,plot=lattice::trellis.last.objec
 #' @param v Same as for h, but for vertical lines.
 #' @param plot the figure to which to add the grid.
 #' @examples
+#' #Make a grid with a gridline at every tickmark.
 #' plotFunFill(x^2~x)
 #' grid.on()
 #'

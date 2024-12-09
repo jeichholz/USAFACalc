@@ -2,7 +2,7 @@
 % Please edit documentation in R/additionalPlotting.R
 \name{place.text}
 \alias{place.text}
-\title{Places text on a figure.}
+\title{Places text on a figure.  Supports some latex symbols, but backslashes must be double backslashes.}
 \usage{
 place.text(
   text,
@@ -11,6 +11,7 @@ place.text(
   col = "black",
   zoom = 1,
   plot = lattice::trellis.last.object(),
+  tex = TRUE,
   ...
 )
 }
@@ -30,10 +31,15 @@ place.text(
 \item{...}{additional options that are passed to panel.text.}
 }
 \description{
-Places text on a figure.
+Places text on a figure.  Supports some latex symbols, but backslashes must be double backslashes.
 }
 \examples{
 plotFunFill(x^2~x)
 place.text("x^2",0.5,0.8)
 
+plotFun(pnorm(x)~x,xlim=c(-3,3),lwd=2)
+mathaxis.on()
+plotFunFill(pnorm(x)~x,xlim=c(-3,1.1),col='magenta',add=TRUE)
+place.text("$x$",1.1,-0.04,cex=1.3)
+place.text("$\\\\int_{-\\\\infty}^x \\\\frac{1}{\\\\sqrt{2\\\\pi}} e^{-\\\\frac{x^2}{2}}\\\\,dx$",0.5,0.3,cex=1.4)
 }

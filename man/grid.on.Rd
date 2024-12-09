@@ -32,6 +32,7 @@ in the vector.}
 Turns on a grid on your plot.
 }
 \examples{
+#Make a grid with a gridline at every tickmark.
 plotFunFill(x^2~x)
 grid.on()
 
