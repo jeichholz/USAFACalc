@@ -2,7 +2,7 @@
 % Please edit documentation in R/additionalPlotting.R
 \name{grid.on}
 \alias{grid.on}
-\title{Turns on a grid for easier viewing.}
+\title{Turns on a grid on your plot.}
 \usage{
 grid.on(
   h = -1,
@@ -14,9 +14,11 @@ grid.on(
 )
 }
 \arguments{
-\item{h}{# of horizontal grid lines to make, with -1 meaning to just line up to tickmarks.}
+\item{h}{number of horizontal grid lines. The default value of -1 means to make a line at every tickmark.
+-2 means to make a line at every other tickmark.  If h is a vector, then make a horizontal gridline at every y-value
+in the vector.}
 
-\item{v}{# of vertical grid lines to make, with -1 meaning to just line up to tickmarks.}
+\item{v}{Same as for h, but for vertical lines.}
 
 \item{lwd}{line width, 2 is about right.}
 
@@ -27,8 +29,20 @@ grid.on(
 \item{plot}{the figure to which to add the grid.
 #@examples
 plotFunFill(x^2~x)
-grid.on()}
+grid.on()
+
+#Make 19 evenly spaced horizontal grid lines, and 9 vertical ones.
+plotFunFill(x^2~x,xlim=c(-2,2))
+grid.on(h=19,v=9)
+
+#Specify where you want the grid lines.
+plotFunFill(x^2~x,xlim=c(-2,2))
+grid.on(h=c(0.5,1,1.5,2,2.5,3,3.5,4),v=c(-1.5,-1,-0.5,0,0.5,1,1.5))
+
+#Do the example above, but more concisely using the seq command.
+plotFunFill(x^2~x,xlim=c(-2,2))
+grid.on(h=seq(0,4,by=0.5),v=seq(-2,2,by=0.5))}
 }
 \description{
-Turns on a grid for easier viewing.
+Turns on a grid on your plot.
 }

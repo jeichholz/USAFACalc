@@ -103,20 +103,35 @@ place.text=function(text,x,y,col="black",zoom=1,plot=lattice::trellis.last.objec
   return(mosaic::ladd(lattice::panel.text(x=x,y=y,labels=text,alpha=1,cex=cex,col=col),data=list(x=x,y=y,text=text,col=col,cex=cex),plot=plot))
 }
 
-#' Turns on a grid for easier viewing.
+#' Turns on a grid on your plot.
 #' @param col grid color
 #' @param lty line type, 1,2,or 3 are good options.
 #' @param lwd line width, 2 is about right.
-#' @param h # of horizontal grid lines to make, with -1 meaning to just line up to tickmarks.
-#' @param v # of vertical grid lines to make, with -1 meaning to just line up to tickmarks.
+#' @param h number of horizontal grid lines. The default value of -1 means to make a line at every tickmark.
+#' -2 means to make a line at every other tickmark.  If h is a vector, then make a horizontal gridline at every y-value
+#' in the vector.
+#' @param v Same as for h, but for vertical lines.
 #' @param plot the figure to which to add the grid.
 #' #@examples
 #' plotFunFill(x^2~x)
 #' grid.on()
 #'
+#'#Make 19 evenly spaced horizontal grid lines, and 9 vertical ones.
+#'plotFunFill(x^2~x,xlim=c(-2,2))
+#'grid.on(h=19,v=9)
+#'
+#'#Specify where you want the grid lines.
+#'plotFunFill(x^2~x,xlim=c(-2,2))
+#'grid.on(h=c(0.5,1,1.5,2,2.5,3,3.5,4),v=c(-1.5,-1,-0.5,0,0.5,1,1.5))
+#'
+#'#Do the example above, but more concisely using the seq command.
+#'plotFunFill(x^2~x,xlim=c(-2,2))
+#'grid.on(h=seq(0,4,by=0.5),v=seq(-2,2,by=0.5))
 #' @export
 grid.on=function(h=-1,v=-1,lwd=2,col="black",lty=2,plot=lattice::trellis.last.object()){
-
+  if (length(h)>1 | length(v)>1){
+   return(mosaic::ladd(lattice::panel.abline(h=h,v=v,lty=lty,col=col),data=list(h=h,v=v,lty=lty,col=col),plot=plot))
+  }
   return(mosaic::ladd(lattice::panel.grid(h=h,v=v,lty=lty,col=col),data=list(h=h,v=v,lty=lty,col=col),plot=plot))
 }
 

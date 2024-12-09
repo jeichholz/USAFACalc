@@ -17,7 +17,7 @@ findZeros(
   trySymbolicSingleVar = FALSE,
   forceMultivariableNumeric = TRUE,
   verbose = FALSE,
-  roundDigits = 2,
+  roundDigits = 3,
   complex = FALSE
 )
 }
