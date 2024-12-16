@@ -170,5 +170,46 @@ bump <- function(x,x0=0,r=1,h=1){
 
 
 
+#' Plot the phase plane for a vector field.
+#' @param ddt A vector-valued function that defines the RHS of your system of ODEs.
+#' @param xlim the limits of the horizontal axis.  Can also use a name that matches your variables.
+#' @param ylim the limits of the vertical axis. Can also use a name that matches your variables.
+#' @param N the number of horizontal and vertical rows of arrows to draw
+#' @param lwd arrow line width
+#' @param col arrow color
+#' @param add T/F variable indicating whether this should be added to plot
+#' @param plot the plot to which this should be added, default is the current plot.
+#' @param ... additional arguments to pass to xyplot arrows.
+#' @examples
+#' # example code
+#' f=mosaic::makeFun(c(-y,x)~x&y)
+#' plotPhasePlane(f(x,y)~x&y, xlim=c(-3,3),ylim=c(-4,4))
+#'
+#' #Classic predator-prey.
+#' ode=mosaic::makeFun(c(2*rabbits-0.5*rabbits*foxes, -1*foxes+0.25*rabbits*foxes)~rabbits&foxes)
+#' plotPhasePlane(ode(rabbits,foxes)~rabbits&foxes,rabbitslim=c(0,10),foxeslim=c(0,10))
+#' mosaic::plotPoints(c(0,4)~c(0,4),pch=19,cex=1.3,col="magenta",add=TRUE)
+#' soln=USAFACalc::Euler(ode(rabbits,foxes)~rabbits&foxes,ic=c(4,2),tlim=c(0,10),stepSize=0.001)
+#' mosaic::plotPoints(foxes~rabbits,data=soln,pch=".",cex=1.3,add=TRUE,col="forestgreen")
+#' @export
+
+plotPhasePlane<-function(ddt,xlim=c(-5,5),ylim=c(-5,5),add=FALSE, N=20,
+                         col="cornflowerblue",lwd=2,plot=lattice::trellis.last.object(),...){
+
+  allVars=all.vars(mosaic::rhs(ddt))
+  #If there are three variables, assume the first one is time, and take that variable out.
+  if (length(allVars)==3 && "t" %in% allVars){
+    exprstr=as.character(ddt)
+    ddt=stats::as.formula(paste0(exprstr[[2]],"~",allVars[[2]],"&",allVars[[3]],collapse=" "))
+    allVars=allVars[2:3]
+  }
+  dots=list(...)
+  lims <- mosaic::inferArgs(dots = dots, vars = allVars, defaults = list(xlim = xlim,ylim=ylim))
+  xlim=lims$xlim
+  ylim=lims$ylim
+
+  plotVectorField(ddt,xlim=xlim,ylim=ylim,add=add,N=N,col=col,lwd=lwd,plot=plot,normalize=TRUE)
+}
+
 
 

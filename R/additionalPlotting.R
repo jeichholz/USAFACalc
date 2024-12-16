@@ -91,6 +91,7 @@ plotFunFill=function(expression,bottom=0,xlim=c(0,1),col="red",alpha=0.5,add=FAL
 #' @param col the text color
 #' @param plot the figure to add the text to.
 #' @param zoom the factor by which to expand the text.
+#' @param tex if TRUE, try to interpret this string as TeX code.
 #' @param ... additional options that are passed to panel.text.
 #' @examples
 #' plotFunFill(x^2~x)
@@ -171,8 +172,8 @@ mathaxis.on=function(lwd=3,col="black",xat=0,yat=0,plot=lattice::trellis.last.ob
 #' @param base The base of the vector
 #' @param col color of the vector
 #' @param lwd width of vector
-#' @param the plot to add to
-#' @param additional arguments to panel.arrows.
+#' @param plot the plot to add to
+#' @param ... additional arguments to panel.arrows.
 #' @examples
 #' blank.canvas(xlim=c(0,5),ylim=c(0,5))
 #' grid.on()

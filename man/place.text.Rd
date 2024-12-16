@@ -28,6 +28,8 @@ place.text(
 
 \item{plot}{the figure to add the text to.}
 
+\item{tex}{if TRUE, try to interpret this string as TeX code.}
+
 \item{...}{additional options that are passed to panel.text.}
 }
 \description{

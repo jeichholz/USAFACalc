@@ -22,9 +22,9 @@ place.vector(
 
 \item{lwd}{width of vector}
 
-\item{the}{plot to add to}
+\item{plot}{the plot to add to}
 
-\item{additional}{arguments to panel.arrows.}
+\item{...}{additional arguments to panel.arrows.}
 }
 \description{
 Places a vector on an already existing figure.  WILL always add to existing figure!
