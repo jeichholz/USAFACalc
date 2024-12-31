@@ -3,11 +3,11 @@
 #' @param xlim limits of integration
 #' @param N number of rectangles.
 #' @examples
-#' Reimann.LH(exp(-x^2/2)~x,xlim=c(-5,5),N=10)
+#' Riemann.LH(exp(-x^2/2)~x,xlim=c(-5,5),N=10)
 #'
 
 #' @export
-Reimann.LH=function(f,xlim=c(0,5),N=10){
+Riemann.LH=function(f,xlim=c(0,5),N=10){
 
   deltax=(xlim[[2]]-xlim[[1]])/N;
   A=plotFunFill(f,xlim=xlim,col="chocolate1",alpha=0.9)
@@ -21,14 +21,23 @@ Reimann.LH=function(f,xlim=c(0,5),N=10){
   return(A)
 
 }
+
+#' Visualize the left-hand rule
+#' @inheritParams Riemann.LH
+#' @export
+Reimann.LH=function(f,xlim=c(0,5),N=10)
+{
+  return(Riemann.LH(f,xlim,N))
+}
+
 #' Visualize the right-hand rule
 #' @param f an expression for the function
 #' @param xlim limits of integration
 #' @param N number of rectangles.
 #' @examples
-#' Reimann.RH(exp(-x^2/2)~x,xlim=c(-5,5),N=10)
+#' Riemann.RH(exp(-x^2/2)~x,xlim=c(-5,5),N=10)
 #' @export
-Reimann.RH=function(f,xlim=c(0,5),N=10){
+Riemann.RH=function(f,xlim=c(0,5),N=10){
 
   deltax=(xlim[[2]]-xlim[[1]])/N;
   A=plotFunFill(f,xlim=xlim,col="chocolate1",alpha=0.9)
@@ -43,14 +52,22 @@ Reimann.RH=function(f,xlim=c(0,5),N=10){
 
 }
 
+#' Visualize the right-hand rule
+#' @inheritParams Riemann.RH
+#' @export
+Reimann.RH=function(f,xlim=c(0,5),N=10){
+  Riemann.RH(f,xlim,N)
+}
+
+
 #' Visualize the midpoint rule
 #' @param f an expression for the function
 #' @param xlim limits of integration
 #' @param N number of rectangles.
 #' @examples
-#' Reimann.MP(exp(-x^2/2)~x,xlim=c(-5,5),N=10)
+#' Riemann.MP(exp(-x^2/2)~x,xlim=c(-5,5),N=10)
 #' @export
-Reimann.MP=function(f,xlim=xlim,N=10){
+Riemann.MP=function(f,xlim=c(0,5),N=10){
 
   deltax=(xlim[[2]]-xlim[[1]])/N;
 
@@ -66,4 +83,10 @@ Reimann.MP=function(f,xlim=xlim,N=10){
   return(fig)
 }
 
+#' Visualize the midpoint rule
+#' @inheritParams Riemann.MP
+#' @export
+Reimann.MP=function(f,xlim=c(0,5),N=10){
+  Riemann.MP(f,xlim,N)
+}
 

@@ -16,6 +16,3 @@ Reimann.RH(f, xlim = c(0, 5), N = 10)
 \description{
 Visualize the right-hand rule
 }
-\examples{
-Reimann.RH(exp(-x^2/2)~x,xlim=c(-5,5),N=10)
-}

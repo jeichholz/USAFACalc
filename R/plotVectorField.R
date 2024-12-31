@@ -196,6 +196,7 @@ bump <- function(x,x0=0,r=1,h=1){
 plotPhasePlane<-function(ddt,xlim=c(-5,5),ylim=c(-5,5),add=FALSE, N=20,
                          col="cornflowerblue",lwd=2,plot=lattice::trellis.last.object(),...){
 
+
   allVars=all.vars(mosaic::rhs(ddt))
   #If there are three variables, assume the first one is time, and take that variable out.
   if (length(allVars)==3 && "t" %in% allVars){

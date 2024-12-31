@@ -4,7 +4,7 @@
 \alias{Reimann.MP}
 \title{Visualize the midpoint rule}
 \usage{
-Reimann.MP(f, xlim = xlim, N = 10)
+Reimann.MP(f, xlim = c(0, 5), N = 10)
 }
 \arguments{
 \item{f}{an expression for the function}
@@ -15,7 +15,4 @@ Reimann.MP(f, xlim = xlim, N = 10)
 }
 \description{
 Visualize the midpoint rule
-}
-\examples{
-Reimann.MP(exp(-x^2/2)~x,xlim=c(-5,5),N=10)
 }
