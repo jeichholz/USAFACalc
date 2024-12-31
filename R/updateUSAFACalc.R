@@ -5,5 +5,8 @@
 #' @param ... will be passed into devtools::install_github
 #' @export
 updateUSAFACalc = function(repo="jeichholz/USAFACalc",upgrade="never",...){
+  #Do the update
   devtools::install_github(repo,upgrade=upgrade,...)
+  #Restart the R session, otherwise the user will have to manually restart in order to see the fixes.
+  rstudioapi::restartSession()
 }
