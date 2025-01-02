@@ -4,11 +4,11 @@
 \alias{Euler}
 \title{Run Euler's method on an ODE.}
 \usage{
-Euler(dydt, tlim, ic, stepSize = (tlim[[2]] - tlim[[1]])/10)
+Euler(dydt, tlim, ic, stepSize = (tlim[[2]] - tlim[[1]])/10, ...)
 }
 \arguments{
-\item{dydt}{an expression defining the right hand side of the ODE. If this is a system of ODE,
-then the order of the equations is the order in which the variables are listed in the expression. t must be the time variable.}
+\item{dydt}{The definition of the ODE.  This may be just the right-hand side of the ODE,
+or you may specify an equation using _t to denote derivative. See examples.}
 
 \item{tlim}{a list containing the start and end of the timeframe to integrate over}
 
@@ -25,19 +25,66 @@ A data frame containing the approximations of the solutions and the correspondin
 Run Euler's method on an ODE.
 }
 \examples{
+#Consider the ODE
+#dy/dt=y*(y-1)
+
+#There are a lot of ways to specify this ode.
+
+#You can specify just the right-hand side of the ODE.
 soln=Euler(y*(y-1) ~ t&y, tlim=c(0,10),ic=0.99)
 soln
 
-results=Euler(5*y*(y-1)~t&y,tlim=c(0,10),ic=0.99,stepSize=0.1)
+#If the equation is autonomous, you don't need to specify t.
+soln=Euler(y*(y-1) ~ y, tlim=c(0,10),ic=0.99)
+soln
+
+#You can write the left-hand side as y_t.  Note that z_t or something else that doesn't match the state variable won't work.
+results=Euler(y_t=y*(y-1)~t&y,tlim=c(0,10),ic=0.99)
 results
+
+#This will fail
+#results=Euler(z_t=y*(y-1)~t&y,tlim=c(0,10),ic=0.99)
+
+#It is fine to make a function out of the right hand side.
+ode=mosaic::makeFun(y*(y-1)~y)
+results=Euler(ode(y)~y, tlim=c(0,10),ic=0.99)
+results
+
+#Or to name it again,
+results=Euler(dydt=ode(y)~y, tlim=c(0,10),ic=0.99)
+results
+
+#Adjust the stepsize with stepSize argument.
+results=Euler(dydt=ode(y)~y, tlim=c(0,10),ic=0.99,stepSize = 0.1)
+head(results)
 mosaic::plotPoints(y~t,data=results)
 
+#Consider the system of differential equations
+#dx/dt=-y
+#dy/dt=x
 
-results=Euler(c(-y,x)~x&y,tlim=c(0,10),ic=c(1,0),stepSize=0.01)
-head(results)
-mosaic::plotPoints(y~x,data=results)
+#Best is to combine the equations using c(), and name each equation using the naming convention _t.
+#Name the initial conditions too.
+results=Euler(c(x_t=-y,y_t=x)~x&y,tlim=c(0,10),ic=c(x=1,y=0))
+results
 
-results=Euler(c(-y,x)~x&y,tlim=c(0,10),ic=c(y=0,x=1),stepSize=0.01)
-head(results)
-mosaic::plotPoints(y~x,data=results)
+#If we name the equations, then the order of the equations and initial conditions does not matter.
+results=Euler(c(y_t=x,x_t=-y)~x&y,tlim=c(0,10),ic=c(x=1,y=0))
+results
+
+results=Euler(c(y_t=x,x_t=-y)~x&y,tlim=c(0,10),ic=c(y=0,x=1))
+results
+
+#If either the equations or the initial condition is unlabels, then we infer the order from the order of the state variables.
+#This corresponds to
+#dx/dt=-y, x(0)=0
+#dy/dt=x,  y(0)=1
+results=Euler(c(-y,x)~x&y,tlim=c(0,10),ic=c(0,1))
+results
+
+#But this corresponds to
+#dy/dt=-y, y(0)=0
+#dxdt=x,   x(0)=1
+results=Euler(c(-y,x)~y&x,tlim=c(0,10),ic=c(0,1))
+results
 }
