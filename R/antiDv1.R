@@ -27,8 +27,9 @@ antiD=function(expression,...){
     #Create a function out of the expression, for the purposes of substituting in the sympy symbol.
     f=mosaic::makeFun(expression,...)
 
-    x=caracas::symbol(vars[[1]])
+    x=caracas::symbol(vars[[1]],real=TRUE)
 
+   #browser()
     #Integrate, so easy!
     F=caracas::int(f(x),x);
 
