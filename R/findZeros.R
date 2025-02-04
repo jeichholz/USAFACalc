@@ -123,7 +123,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
     #I truly suspect that this will go better if we just have functions of x. We can call whatever later.
     x=caracas::symbol("x")
     #If we are dealing with a polynomial, great. If not, error.
-    if (lower(caracas::as_character(caracas::sympy_func(func(x),"is_polynomial")))=="false"){
+    if (base::tolower(caracas::as_character(caracas::sympy_func(func(x),"is_polynomial")))=="false"){
       stop("Expression is not a polynomial")
     }
 
