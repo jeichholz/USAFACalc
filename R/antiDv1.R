@@ -29,6 +29,7 @@ antiD=function(expression,...){
 
     x=caracas::symbol(vars[[1]])
 
+   #browser()
     #Integrate, so easy!
     F=caracas::int(f(x),x);
 

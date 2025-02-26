@@ -50,7 +50,7 @@
 #'
 #' @export
 findZeros=function(expr, ..., xlim = c(near - within, near + within),
-                           near = 0, within = 100, nearest = 10, npts = 1e4, iterate = 1,
+                           near = NA, within = NA, nearest = 10, npts = 1e4, iterate = 1,
                            sortBy = c("byx", "byy", "radial"),trySymbolicSingleVar=FALSE,forceMultivariableNumeric=TRUE,
                           verbose=FALSE,roundDigits=3,complex=FALSE){
 
@@ -105,30 +105,60 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
   #
   #If the function is polynomial then it is my expectation that this will work, it won't return complex numbers.
   #There should be no case in which this will return, e.g., null.
-  polynomialSolver=function(func,symbol,symbolName,complex=FALSE){
+  polynomialSolver=function(func,symbol,symbolName,complex=FALSE, xlim, near, within){
+
+    if (is.na(within)){
+      within=Inf;
+    }
+    if (is.na(near)){
+      near=0;
+    }
+    if (any(is.na(xlim))){
+      xlim=c(near-within,near+within);
+    }
+
     if (verbose){
       print('Attempting polynomial solve')
     }
     #I truly suspect that this will go better if we just have functions of x. We can call whatever later.
     x=caracas::symbol("x")
     #If we are dealing with a polynomial, great. If not, error.
-    if (caracas::as_character(caracas::sympy_func(func(x),"is_polynomial"))=="False"){
+    if (base::tolower(caracas::as_character(caracas::sympy_func(func(x),"is_polynomial")))=="false"){
       stop("Expression is not a polynomial")
     }
 
 
 
-    if (complex){
-      sympy_roots=caracas::sympy_func(func(x),"solve")
-    }
-    else{
-      sympy_roots=caracas::sympy_func(func(x),"real_roots");
-    }
+    #if (complex){
+    sympy_roots=caracas::sympy_func(func(x),"solve")
+    #}
+
+    #Don't use real_roots.  Reasoning is that it is *too* good.  If coefficients get
+    #rounded during manipulation, e.g. taking a derivative, you might end up with a rounded polynomial
+    #that doesn't have as many real roots as you want.  Better to find all the roots, then assume that all roots with small
+    #imaginary part are real.
+
+    #else{
+    #  sympy_roots=caracas::sympy_func(func(x),"real_roots");
+    #}
     #df=data.frame(unlist(lapply(sympy_roots,extractNumberFromSymbolic)));
     df=data.frame(unlist(lapply(sympy_roots,function(x){extractNumberFromSymbolic(caracas::sympy_func(x,"n"))})))
     if (length(sympy_roots)==0){
       df=data.frame(matrix(nrow=0,ncol=1))
     }
+
+    if (complex==FALSE){
+      imagTol=1e-5  #Just drop the imaginary part of the number if it is less than 1e-10, assume it is roundoff error.
+      df=dplyr::filter_all(df, dplyr::all_vars(abs(Im(.)) < imagTol)) #Keep only rows that have all small imaginary parts
+      df=dplyr::mutate_all(df,Re)
+
+      df=dplyr::filter_all(df, dplyr::all_vars(((.)) >= xlim[[1]]))
+      df=dplyr::filter_all(df, dplyr::all_vars(((.)) <= xlim[[2]]))
+
+    }
+
+
+
     names(df)=symbolName;
     return(df);
   }
@@ -145,12 +175,33 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
 
   #This function may also return NaN for a solution -- I should probably just delete those.
 
-  singleVariableSymbolicSolver=function(func,symbol,symbolName){
+  singleVariableSymbolicSolver=function(func,symbol,symbolName,xlim,near,within){
+
+    if (is.na(near)){
+      near=0;
+    }
+    if (is.na(within)){
+      within=Inf;
+    }
+
+    if (any(is.na(xlim))){
+      xlim=c(near-within,near+within);
+    }
+
     if (verbose){
       print("Attempting single-variable symbolic solve")
     }
-    sympy_roots=caracas::solve_sys(func(symbol),symbol)
-    df=data.frame(unlist(lapply(sympy_roots, function(x){ extractNumberFromSymbolic(x[[symbolName]])})))
+
+    sympy_roots=caracas::sympy_func(func(symbol),"solve");
+    df=data.frame(unlist(lapply(sympy_roots, function(x){ extractNumberFromSymbolic(caracas::sympy_func(x,"n"))})))
+
+    if (length(sympy_roots)==0){
+      df=data.frame(matrix(nrow=0,ncol=1))
+    }
+
+    df=dplyr::filter_all(df, dplyr::all_vars(((.)) >= xlim[[1]]))
+    df=dplyr::filter_all(df, dplyr::all_vars(((.)) <= xlim[[2]]))
+
     names(df)=symbolName;
     return(df)
   }
@@ -159,7 +210,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
   #This is a symbolic solver for systems of equations.  It relies on the symbolic solver from sympy.
   #As such, it might miss solutions, just like the symbolic general solver.  Indeed, there is almost zero difference between the two.
   #We might consider a numerical system solver as an alternative, but we'll give this a go for now.
-  symbolicSystemSolver=function(func,symbols,symbolNames,complex=FALSE){
+  symbolicSystemSolver=function(func,symbols,symbolNames,complex=FALSE,xlim, near, within){
     if (verbose){
       print("Attempting symbolic system solve")
     }
@@ -201,7 +252,17 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
   #Solutions are currently rounded to 5 decimal places -- can think about the correct way to do that later.
   #
 
-  singleVariableNumericSolver=function(func,varName){
+  singleVariableNumericSolver=function(func,varName, xlim,near,within){
+
+    if (is.na(within)){
+      within=Inf;
+    }
+    if (is.na(near)){
+      near=0;
+    }
+    if(any(is.na(xlim))){
+      xlim=c(near-within,near+within);
+    }
 
     if (verbose){
       print("Attempting single-variable numeric solve")
@@ -307,8 +368,16 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
   }
 
 
-  multiVariableNumericSolver=function(func,varnames,near=rep(0,length(varnames)),within=100,npts=100000){
+  multiVariableNumericSolver=function(func,varnames,near,within,npts=100000){
      numVars=length(varnames);
+
+     if (any(is.na(near))){
+       near=0;
+     }
+
+     if (any(is.na(within))){
+       within=100;
+     }
 
       #if near happens to be a scalar, fix it for the user.
       if (length(near)==1){
@@ -324,6 +393,8 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
       if (length(within)==1){
         within=rep(within[[1]],numVars);
       }
+
+
 
       #Ok, generate the limits for each dimension.
       xtop=near+within;
@@ -410,7 +481,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
     if (verbose){
       print("   Error in symbolic solver, sending to numeric solver.")
     }
-    return(singleVariableNumericSolver(pfun,varNames[[1]]))
+    return(singleVariableNumericSolver(pfun,varNames[[1]],near=near,within=within,xlim=xlim))
   }
 
 
@@ -424,7 +495,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
         print("   Error in polynomial solver. Sending to single-variable general symbolic solver")
       }
       tryCatch(
-        return(singleVariableSymbolicSolver(pfun,varSymbols,varNames)),
+        return(singleVariableSymbolicSolver(pfun,varSymbols,varNames,xlim=xlim,near=near,within=within)),
         warning=singleVariableSolverErrorHandler,
         error=singleVariableSolverErrorHandler)
     }
@@ -432,19 +503,9 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
       if (verbose){
         print("   Error in polynomial solver. Sending to numeric solver.")
       }
-      return(singleVariableNumericSolver(pfun,varNames[[1]]))
+      return(singleVariableNumericSolver(pfun,varNames[[1]],near=near,within=within,xlim=xlim))
     }
   }
-
-
-
-
-
-
-
-
-
-
 
   #Here is the actual solving.  Almost all of the above is defining how to do things, not doing them.
 
@@ -461,7 +522,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
       if (verbose){
         print("Attempting multivariable numeric solve -- forced to do so")
       }
-      return(multiVariableNumericSolver(pfun,varNames,near,within,npts))
+      return(multiVariableNumericSolver(pfun,varNames,near=near, within=within,npts))
     }
     else{
       tryCatch({
@@ -469,7 +530,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
       },
       error=function(e){
         print("multivariable symbolic solve failed. Attempting numeric solve.")
-        return(multiVariableNumericSolver(pfun,varNames,near,within,npts))
+        return(multiVariableNumericSolver(pfun,varNames,near=near,within=within,npts))
       })
     }
   }
@@ -478,7 +539,7 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
   #trySymbolicSingleVariable=T.
   else{
     tryCatch(
-      return(polynomialSolver(mosaic::makeFun(expr),varSymbols,varNames,complex=complex)),
+      return(polynomialSolver(mosaic::makeFun(expr),varSymbols,varNames,complex=complex,xlim=xlim,near=near,within=within)),
       warning=polynomialErrorHandler,
       error=polynomialErrorHandler)
   }
