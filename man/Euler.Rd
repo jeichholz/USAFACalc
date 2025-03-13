@@ -7,19 +7,24 @@
 Euler(dydt, tlim, ic, stepSize = (tlim[[2]] - tlim[[1]])/10, ...)
 }
 \arguments{
-\item{dydt}{The definition of the ODE.  This may be just the right-hand side of the ODE,
+\item{dydt}{The definition of the ODE.  This may be just the right-hand side
+of the ODE,
 or you may specify an equation using _t to denote derivative. See examples.}
 
-\item{tlim}{a list containing the start and end of the timeframe to integrate over}
+\item{tlim}{a list containing the start and end of the timeframe to integrate
+over}
 
-\item{ic}{the initial condition.  If this is a scalar ODE then you can do ic=4. If this is a system then you
-must provide a list of values in the correct order as determined by the listing of varaibles in dydt. You may also
-provide a list with names, in that case order doesn't matter.}
+\item{ic}{the initial condition.  If this is a scalar ODE then you can do
+ic=4. If this is a system then you
+must provide a list of values in the correct order as determined by the
+listing of varaibles in dydt. You may also provide a list with names, in that
+case order doesn't matter.}
 
 \item{stepSize}{length of timestep to take.}
 }
 \value{
-A data frame containing the approximations of the solutions and the corresponding times.
+A data frame containing the approximations of the solutions and the
+corresponding times.
 }
 \description{
 Run Euler's method on an ODE.
@@ -38,7 +43,8 @@ soln
 soln=Euler(y*(y-1) ~ y, tlim=c(0,10),ic=0.99)
 soln
 
-#You can write the left-hand side as y_t.  Note that z_t or something else that doesn't match the state variable won't work.
+#You can write the left-hand side as y_t.  Note that z_t or something else
+#that doesn't match the state variable won't work.
 results=Euler(y_t=y*(y-1)~t&y,tlim=c(0,10),ic=0.99)
 results
 
@@ -63,19 +69,22 @@ mosaic::plotPoints(y~t,data=results)
 #dx/dt=-y
 #dy/dt=x
 
-#Best is to combine the equations using c(), and name each equation using the naming convention _t.
+#Best is to combine the equations using c(), and name each equation using
+#the naming convention _t.
 #Name the initial conditions too.
 results=Euler(c(x_t=-y,y_t=x)~x&y,tlim=c(0,10),ic=c(x=1,y=0))
 results
 
-#If we name the equations, then the order of the equations and initial conditions does not matter.
+#If we name the equations, then the order of the equations and initial
+#conditions does not matter.
 results=Euler(c(y_t=x,x_t=-y)~x&y,tlim=c(0,10),ic=c(x=1,y=0))
 results
 
 results=Euler(c(y_t=x,x_t=-y)~x&y,tlim=c(0,10),ic=c(y=0,x=1))
 results
 
-#If either the equations or the initial condition is unlabels, then we infer the order from the order of the state variables.
+#If either the equations or the initial condition is unlabels, then we infer
+#the order from the order of the state variables.
 #This corresponds to
 #dx/dt=-y, x(0)=0
 #dy/dt=x,  y(0)=1
