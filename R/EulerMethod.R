@@ -1,11 +1,15 @@
 #' Run Euler's method on an ODE.
 #'
-#' @param dydt The definition of the ODE.  This may be just the right-hand side of the ODE,
+#' @param dydt The definition of the ODE.  This may be just the right-hand side
+#' of the ODE,
 #' or you may specify an equation using _t to denote derivative. See examples.
-#' @param tlim a list containing the start and end of the timeframe to integrate over
-#' @param ic the initial condition.  If this is a scalar ODE then you can do ic=4. If this is a system then you
-#' must provide a list of values in the correct order as determined by the listing of varaibles in dydt. You may also
-#' provide a list with names, in that case order doesn't matter.
+#' @param tlim a list containing the start and end of the timeframe to integrate
+#' over
+#' @param ic the initial condition.  If this is a scalar ODE then you can do
+#' ic=4. If this is a system then you
+#' must provide a list of values in the correct order as determined by the
+#' listing of varaibles in dydt. You may also provide a list with names, in that
+#' case order doesn't matter.
 #' @param stepSize length of timestep to take.
 #' @examples
 #' #Consider the ODE
@@ -21,7 +25,8 @@
 #' soln=Euler(y*(y-1) ~ y, tlim=c(0,10),ic=0.99)
 #' soln
 #'
-#' #You can write the left-hand side as y_t.  Note that z_t or something else that doesn't match the state variable won't work.
+#' #You can write the left-hand side as y_t.  Note that z_t or something else
+#' #that doesn't match the state variable won't work.
 #' results=Euler(y_t=y*(y-1)~t&y,tlim=c(0,10),ic=0.99)
 #' results
 #'
@@ -46,19 +51,22 @@
 #' #dx/dt=-y
 #' #dy/dt=x
 #'
-#' #Best is to combine the equations using c(), and name each equation using the naming convention _t.
+#' #Best is to combine the equations using c(), and name each equation using
+#' #the naming convention _t.
 #' #Name the initial conditions too.
 #' results=Euler(c(x_t=-y,y_t=x)~x&y,tlim=c(0,10),ic=c(x=1,y=0))
 #' results
 #'
-#' #If we name the equations, then the order of the equations and initial conditions does not matter.
+#' #If we name the equations, then the order of the equations and initial
+#' #conditions does not matter.
 #' results=Euler(c(y_t=x,x_t=-y)~x&y,tlim=c(0,10),ic=c(x=1,y=0))
 #' results
 #'
 #' results=Euler(c(y_t=x,x_t=-y)~x&y,tlim=c(0,10),ic=c(y=0,x=1))
 #' results
 #'
-#' #If either the equations or the initial condition is unlabels, then we infer the order from the order of the state variables.
+#' #If either the equations or the initial condition is unlabels, then we infer
+#' #the order from the order of the state variables.
 #' #This corresponds to
 #' #dx/dt=-y, x(0)=0
 #' #dy/dt=x,  y(0)=1
@@ -70,7 +78,8 @@
 #' #dxdt=x,   x(0)=1
 #' results=Euler(c(-y,x)~y&x,tlim=c(0,10),ic=c(0,1))
 #' results
-#' @returns A data frame containing the approximations of the solutions and the corresponding times.
+#' @returns A data frame containing the approximations of the solutions and the
+#' corresponding times.
 #' @export
 Euler=function(dydt,tlim,ic,stepSize=(tlim[[2]]-tlim[[1]])/10,...){
   t0=tlim[[1]];

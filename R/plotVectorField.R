@@ -47,7 +47,7 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
   seqx = seq(xlim[[1]],xlim[[2]],length.out=N)
   seqy = seq(ylim[[1]],ylim[[2]],length.out=N)
 
-  radius=0.8*max(seqx[[2]]-seqx[[1]],seqy[[2]]-seqx[[1]])
+  radius=0.8*max(seqx[[2]]-seqx[[1]],seqy[[2]]-seqy[[1]])
 
   grid=expand.grid(seqx,seqy);
   grid$Fx=0;
@@ -61,7 +61,6 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
     grid$Fx[i]=vec[[1]];
     grid$Fy[i]=vec[[2]];
   }
-
 
   grid$nrm=sqrt(grid$Fx^2+grid$Fy^2)
   maxrootlen=max(sqrt(grid$nrm));
