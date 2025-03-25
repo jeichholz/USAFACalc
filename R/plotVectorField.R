@@ -49,6 +49,7 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
 
   radius=0.8*max(seqx[[2]]-seqx[[1]],seqy[[2]]-seqy[[1]])
 
+
   grid=expand.grid(seqx,seqy);
   grid$Fx=0;
   grid$Fy=0;
@@ -79,7 +80,7 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
     return(lattice::xyplot(Var2~Var1,panel=function(...){
       lattice::panel.arrows(x0=grid$Var1,y0=grid$Var2,x1=grid$toVar1,y1=grid$toVar2,length=grid::unit(0.3*grid$displayLen,"native"),
                             col=grid$Color,lwd=lwd,xlab=xlab,ylab=ylab)},
-                            data=grid,xlab=allVars[[1]],ylab=allVars[[2]],...))
+                            data=grid,xlab=allVars[[1]],ylab=allVars[[2]],xlim=xlim,ylim=ylim,...))
   }
 
   if (add){
@@ -152,8 +153,11 @@ plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),ics=NA, N=20
 
   if (!any(is.na(y0s))){
     for (y0 in y0s){
-      em=Euler(expression,tlim,y0,0.01);
-      A=mosaic::plotPoints(y~t,data=em,add=TRUE,plot=A)
+      #browser()
+      em=Euler(expression,tlim,y0,(tlim[[2]]-tlim[[1]])/1000);
+      g=splinefun(em$t,em$y)
+      #A=mosaic::plotFun(g(t)~t,add=TRUE,tlim=c(-3,3),lwd=lwd,npts=1000,plot=A)
+      A=mosaic::plotPoints(y~t,data=em,add=TRUE,pch='.',cex=3,plot=A)
     }
   }
   return(A)
