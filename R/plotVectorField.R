@@ -128,7 +128,7 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
 #'
 #' @export
 plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),ics=NA, N=20,
-                               col="black",lwd=2,add=FALSE,plot=lattice::trellis.last.object()){
+                               col="black",lwd=2,add=FALSE,plot=lattice::trellis.last.object(),...){
 
   y0s=ics;
 
@@ -149,14 +149,14 @@ plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),ics=NA, N=20
   dydt=mosaicCore::makeFun(expression);
   dydt1=mosaicCore::makeFun(c(1,dydt(t,y))~t&y)
 
-  A=plotVectorField(dydt1(t,y)~t&y,xlim=tlim,ylim=ylim,N=N,col=col,lwd=lwd,add=add,normalize=TRUE,plot=plot)
+  A=plotVectorField(dydt1(t,y)~t&y,xlim=tlim,ylim=ylim,N=N,col=col,lwd=lwd,add=add,normalize=TRUE,plot=plot,...)
 
   if (!any(is.na(y0s))){
     for (y0 in y0s){
       #browser()
       em=Euler(expression,tlim,y0,(tlim[[2]]-tlim[[1]])/1000);
       g=splinefun(em$t,em$y)
-      #A=mosaic::plotFun(g(t)~t,add=TRUE,tlim=c(-3,3),lwd=lwd,npts=1000,plot=A)
+      #A=plotFun(g(t)~t,add=TRUE,tlim=c(-3,3),lwd=lwd,npts=1000,plot=A)
       A=mosaic::plotPoints(y~t,data=em,add=TRUE,pch='.',cex=3,plot=A)
     }
   }
