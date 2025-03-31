@@ -13,7 +13,8 @@ plotODEDirectionField(
   col = "black",
   lwd = 2,
   add = FALSE,
-  plot = lattice::trellis.last.object()
+  plot = lattice::trellis.last.object(),
+  ...
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ plotODEDirectionField(
 \item{add}{T/F variable indicating whether this should be added to plot}
 
 \item{plot}{the plot to which this should be added, default is the current plot.}
+
+\item{...}{additional arguments to pass to xyplot arrows.}
 }
 \description{
 Plot a direction field for a scalar ODE
