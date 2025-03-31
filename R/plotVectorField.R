@@ -76,11 +76,20 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
   grid$toVar1=grid$Var1+ifelse(grid$nrm==0,0,grid$displayLen/grid$nrm)*grid$Fx
   grid$toVar2=grid$Var2+ifelse(grid$nrm==0,0,grid$displayLen/grid$nrm)*grid$Fy
 
+  #browser()
   if (!add){
-    return(lattice::xyplot(Var2~Var1,panel=function(...){
-      lattice::panel.arrows(x0=grid$Var1,y0=grid$Var2,x1=grid$toVar1,y1=grid$toVar2,length=grid::unit(0.3*grid$displayLen,"native"),
-                            col=grid$Color,lwd=lwd,xlab=xlab,ylab=ylab)},
-                            data=grid,xlab=allVars[[1]],ylab=allVars[[2]],xlim=xlim,ylim=ylim,...))
+    return(lattice::xyplot(Var2~Var1,
+                           panel=function(...){
+                              lattice::panel.arrows(x0=grid$Var1,
+                                                    y0=grid$Var2,
+                                                    x1=grid$toVar1,
+                                                    y1=grid$toVar2,
+                                                    length=grid::unit(0.3*grid$displayLen,"native"),
+                                                    col=grid$Color,lwd=lwd,
+                                                    xlab=xlab,ylab=ylab,...)},
+                          data=grid,
+                          xlab=allVars[[1]],ylab=allVars[[2]],
+                          xlim=xlim,ylim=ylim,...))
   }
 
   if (add){
@@ -167,14 +176,6 @@ plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),ics=NA, N=20
 
 }
 
-bump <- function(x,x0=0,r=1,h=1){
-  y=x*0;
-  y=(abs(x-x0)<r-1e-2)*h*exp(1/(((x-x0)/r)^2-1))/exp(-1);
-  y[is.na(y)]=0;
-  return(y);
-}
-
-
 
 #' Plot the phase plane for a vector field.
 #' @param ddt A vector-valued function that defines the RHS of your system of ODEs.
@@ -216,8 +217,8 @@ plotPhasePlane<-function(ddt,xlim=c(-5,5),ylim=c(-5,5),add=FALSE, N=20,
   lims <- mosaic::inferArgs(dots = dots, vars = allVars, defaults = list(xlim = xlim,ylim=ylim))
   xlim=lims$xlim
   ylim=lims$ylim
-
-  A=plotVectorField(ddt,xlim=xlim,ylim=ylim,add=add,N=N,col=col,lwd=lwd,plot=plot,normalize=TRUE)
+  #browser()
+  A=plotVectorField(ddt,xlim=xlim,ylim=ylim,add=add,N=N,col=col,lwd=lwd,plot=plot,normalize=TRUE,...)
 
   if (!any(is.na(ics))){
     #browser()
