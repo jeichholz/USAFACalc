@@ -76,11 +76,20 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
   grid$toVar1=grid$Var1+ifelse(grid$nrm==0,0,grid$displayLen/grid$nrm)*grid$Fx
   grid$toVar2=grid$Var2+ifelse(grid$nrm==0,0,grid$displayLen/grid$nrm)*grid$Fy
 
+  #browser()
   if (!add){
-    return(lattice::xyplot(Var2~Var1,panel=function(...){
-      lattice::panel.arrows(x0=grid$Var1,y0=grid$Var2,x1=grid$toVar1,y1=grid$toVar2,length=grid::unit(0.3*grid$displayLen,"native"),
-                            col=grid$Color,lwd=lwd,xlab=xlab,ylab=ylab)},
-                            data=grid,xlab=allVars[[1]],ylab=allVars[[2]],xlim=xlim,ylim=ylim,...))
+    return(lattice::xyplot(Var2~Var1,
+                           panel=function(...){
+                              lattice::panel.arrows(x0=grid$Var1,
+                                                    y0=grid$Var2,
+                                                    x1=grid$toVar1,
+                                                    y1=grid$toVar2,
+                                                    length=grid::unit(0.3*grid$displayLen,"native"),
+                                                    col=grid$Color,lwd=lwd,
+                                                    xlab=xlab,ylab=ylab,...)},
+                          data=grid,
+                          xlab=allVars[[1]],ylab=allVars[[2]],
+                          xlim=xlim,ylim=ylim,...))
   }
 
   if (add){
@@ -146,31 +155,26 @@ plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),ics=NA, N=20
                "(",paste0(as.character(allVars),collapse=","),")"))
   }
 
-  dydt=mosaicCore::makeFun(expression);
-  dydt1=mosaicCore::makeFun(c(1,dydt(t,y))~t&y)
+  exprstr=as.character(expression)
+  dydt1=stats::as.formula(paste("c(1,",exprstr[[2]],")~",exprstr[[3]],collapse=" "))
 
-  A=plotVectorField(dydt1(t,y)~t&y,xlim=tlim,ylim=ylim,N=N,col=col,lwd=lwd,add=add,normalize=TRUE,plot=plot,...)
+  A=plotVectorField(dydt1,xlim=tlim,ylim=ylim,N=N,col=col,lwd=lwd,add=add,normalize=TRUE,plot=plot,...)
 
   if (!any(is.na(y0s))){
+    dydt=mosaicCore::makeFun(expression);
+    odefun=function(t,y,parms){
+      return(list(dydt(t,y)))
+    }
     for (y0 in y0s){
       #browser()
-      em=Euler(expression,tlim,y0,(tlim[[2]]-tlim[[1]])/1000);
-      g=splinefun(em$t,em$y)
-      #A=plotFun(g(t)~t,add=TRUE,tlim=c(-3,3),lwd=lwd,npts=1000,plot=A)
-      A=mosaic::plotPoints(y~t,data=em,add=TRUE,pch='.',cex=3,plot=A)
+      soln=as.data.frame(deSolve::ode(y0,seq(tlim[[1]],tlim[[2]],length.out=1000),odefun));
+      colnames(soln)[[2]]="y"
+      A=mosaic::plotPoints(y~time,data=soln,add=TRUE,type="l",lwd=lwd+2,col="darkorchid",plot=A)
     }
   }
   return(A)
 
 }
-
-bump <- function(x,x0=0,r=1,h=1){
-  y=x*0;
-  y=(abs(x-x0)<r-1e-2)*h*exp(1/(((x-x0)/r)^2-1))/exp(-1);
-  y[is.na(y)]=0;
-  return(y);
-}
-
 
 
 #' Plot the phase plane for a vector field.
@@ -182,6 +186,7 @@ bump <- function(x,x0=0,r=1,h=1){
 #' @param col arrow color
 #' @param add T/F variable indicating whether this should be added to plot
 #' @param plot the plot to which this should be added, default is the current plot.
+#' @param ics -- a list of initial conditions from which to draw trajectories.
 #' @param ... additional arguments to pass to xyplot arrows.
 #' @examples
 #' # example code
@@ -190,14 +195,15 @@ bump <- function(x,x0=0,r=1,h=1){
 #'
 #' #Classic predator-prey.
 #' ode=mosaic::makeFun(c(2*rabbits-0.5*rabbits*foxes, -1*foxes+0.25*rabbits*foxes)~rabbits&foxes)
-#' plotPhasePlane(ode(rabbits,foxes)~rabbits&foxes,rabbitslim=c(0,10),foxeslim=c(0,10))
+#' plotPhasePlane(ode(rabbits,foxes)~rabbits&foxes,rabbitslim=c(0,10),foxeslim=c(0,10),ics=c(4,2))
 #' mosaic::plotPoints(c(0,4)~c(0,4),pch=19,cex=1.3,col="magenta",add=TRUE)
-#' soln=USAFACalc::Euler(ode(rabbits,foxes)~rabbits&foxes,ic=c(4,2),tlim=c(0,10),stepSize=0.001)
-#' mosaic::plotPoints(foxes~rabbits,data=soln,pch=".",cex=1.3,add=TRUE,col="forestgreen")
+#' plotPhasePlane(ode(rabbits,foxes)~rabbits&foxes,rabbitslim=c(0,10),foxeslim=c(0,10),ics=list(c(4,2),c(4,3)))
+
+
 #' @export
 
 plotPhasePlane<-function(ddt,xlim=c(-5,5),ylim=c(-5,5),add=FALSE, N=20,
-                         col="cornflowerblue",lwd=2,plot=lattice::trellis.last.object(),...){
+                         col="cornflowerblue",lwd=2,plot=lattice::trellis.last.object(),ics=NA,...){
 
 
   allVars=all.vars(mosaic::rhs(ddt))
@@ -211,8 +217,37 @@ plotPhasePlane<-function(ddt,xlim=c(-5,5),ylim=c(-5,5),add=FALSE, N=20,
   lims <- mosaic::inferArgs(dots = dots, vars = allVars, defaults = list(xlim = xlim,ylim=ylim))
   xlim=lims$xlim
   ylim=lims$ylim
+  #browser()
+  A=plotVectorField(ddt,xlim=xlim,ylim=ylim,add=add,N=N,col=col,lwd=lwd,plot=plot,normalize=TRUE,...)
 
-  plotVectorField(ddt,xlim=xlim,ylim=ylim,add=add,N=N,col=col,lwd=lwd,plot=plot,normalize=TRUE)
+  if (!any(is.na(ics))){
+    #browser()
+    fun1=mosaic::makeFun(ddt)
+    odefun=function(t,y,parms){
+      return(list(fun1(y[[1]],y[[2]])))
+    }
+
+    times=seq(0,100,by=0.1)
+    if (is(ics,"numeric")){
+      ics=list(ics)
+    }
+
+    for (ic in ics){
+
+      if (length(ic)!=2){
+        print(paste("Error. Length of initial condition must be 2. Given initial condition (",ic,") is",length(ic),collapse = " "))
+      }
+
+      soln=as.data.frame(deSolve::ode(ic,times,odefun))
+      colnames(soln)[[2]]="x"
+      colnames(soln)[[3]]="y"
+      A=mosaic::plotPoints(y~x,data=soln,plot=A,add=TRUE,col="firebrick",type="l",lwd=lwd+1)
+    }
+
+
+  }
+
+  return(A)
 }
 
 

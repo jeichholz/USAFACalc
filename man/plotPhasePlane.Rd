@@ -13,6 +13,7 @@ plotPhasePlane(
   col = "cornflowerblue",
   lwd = 2,
   plot = lattice::trellis.last.object(),
+  ics = NA,
   ...
 )
 }
@@ -33,6 +34,8 @@ plotPhasePlane(
 
 \item{plot}{the plot to which this should be added, default is the current plot.}
 
+\item{ics}{-- a list of initial conditions from which to draw trajectories.}
+
 \item{...}{additional arguments to pass to xyplot arrows.}
 }
 \description{
@@ -45,8 +48,7 @@ plotPhasePlane(f(x,y)~x&y, xlim=c(-3,3),ylim=c(-4,4))
 
 #Classic predator-prey.
 ode=mosaic::makeFun(c(2*rabbits-0.5*rabbits*foxes, -1*foxes+0.25*rabbits*foxes)~rabbits&foxes)
-plotPhasePlane(ode(rabbits,foxes)~rabbits&foxes,rabbitslim=c(0,10),foxeslim=c(0,10))
+plotPhasePlane(ode(rabbits,foxes)~rabbits&foxes,rabbitslim=c(0,10),foxeslim=c(0,10),ics=c(4,2))
 mosaic::plotPoints(c(0,4)~c(0,4),pch=19,cex=1.3,col="magenta",add=TRUE)
-soln=USAFACalc::Euler(ode(rabbits,foxes)~rabbits&foxes,ic=c(4,2),tlim=c(0,10),stepSize=0.001)
-mosaic::plotPoints(foxes~rabbits,data=soln,pch=".",cex=1.3,add=TRUE,col="forestgreen")
+plotPhasePlane(ode(rabbits,foxes)~rabbits&foxes,rabbitslim=c(0,10),foxeslim=c(0,10),ics=list(c(4,2),c(4,3)))
 }
