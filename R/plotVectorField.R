@@ -47,8 +47,9 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
   seqx = seq(xlim[[1]],xlim[[2]],length.out=N)
   seqy = seq(ylim[[1]],ylim[[2]],length.out=N)
 
-  radius=0.8*max(seqx[[2]]-seqx[[1]],seqy[[2]]-seqy[[1]])
+  #radius=0.8*max(seqx[[2]]-seqx[[1]],seqy[[2]]-seqy[[1]])
 
+  radius_scrunits=0.8*1/N;
 
   grid=expand.grid(seqx,seqy);
   grid$Fx=0;
@@ -63,18 +64,22 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
     grid$Fy[i]=vec[[2]];
   }
 
+  Lx=xlim[[2]]-xlim[[1]];
+  Ly=ylim[[2]]-ylim[[1]];
+
   grid$nrm=sqrt(grid$Fx^2+grid$Fy^2)
-  maxrootlen=max(sqrt(grid$nrm));
+  grid$nrm_scrunits=sqrt((grid$Fx/Lx)^2+(grid$Fy/Ly)^2)
+  maxrootlen_scrunits=max(sqrt(grid$nrm_scrunits));
 
   if (normalize){
-    grid$displayLen=radius;
+    grid$displayLen_scrunits=radius_scrunits;
   }
   else{
-    grid$displayLen=radius*sqrt(grid$nrm)/maxrootlen
+    grid$displayLen_scrunits=radius_scrunits*sqrt(grid$nrm_scrunits)/maxrootlen_scrunits
   }
 
-  grid$toVar1=grid$Var1+ifelse(grid$nrm==0,0,grid$displayLen/grid$nrm)*grid$Fx
-  grid$toVar2=grid$Var2+ifelse(grid$nrm==0,0,grid$displayLen/grid$nrm)*grid$Fy
+  grid$toVar1=grid$Var1+ifelse(grid$nrm==0,0,grid$displayLen_scrunits/grid$nrm_scrunits)*grid$Fx
+  grid$toVar2=grid$Var2+ifelse(grid$nrm==0,0,grid$displayLen_scrunits/grid$nrm_scrunits)*grid$Fy
 
   #browser()
   if (!add){
@@ -84,7 +89,7 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
                                                     y0=grid$Var2,
                                                     x1=grid$toVar1,
                                                     y1=grid$toVar2,
-                                                    length=grid::unit(0.3*grid$displayLen,"native"),
+                                                    length=grid::unit(0.3*grid$displayLen,"npc"),
                                                     col=grid$Color,lwd=lwd,
                                                     xlab=xlab,ylab=ylab,...)},
                           data=grid,
@@ -95,7 +100,7 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
   if (add){
     under=FALSE;
      return(plot + latticeExtra::layer(do.call(lattice::panel.arrows,
-                                               list(grid$Var1, grid$Var2,grid$toVar1,grid$toVar2,col=grid$Color,length=grid::unit(0.3*grid$displayLen,"native"),
+                                               list(grid$Var1, grid$Var2,grid$toVar1,grid$toVar2,col=grid$Color,length=grid::unit(0.3*grid$displayLen,"npc"),
                                                     lwd=lwd)),data = as.list(environment()), under = under))
   }
 
