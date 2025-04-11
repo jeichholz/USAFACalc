@@ -49,7 +49,20 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
 
   #radius=0.8*max(seqx[[2]]-seqx[[1]],seqy[[2]]-seqy[[1]])
 
-  radius_scrunits=0.8*1/N;
+
+  #Get the x and y axis length, in plot units.
+  x_len=xlim[[2]]-xlim[[1]]
+  y_len=ylim[[2]]-ylim[[1]]
+
+  #Get the current plot size, in mm.
+  plot_size_mm= lattice::current.panel.limits("mm")
+
+
+  #Get the x and y axis length, in mm.
+  x_len_mm=plot_size_mm$x[[2]]-plot_size_mm$x[[1]]
+  y_len_mm=plot_size_mm$y[[2]]-plot_size_mm$y[[1]]
+
+  radius_mm = 0.8*min(x_len_mm/N, y_len_mm/N);
 
   grid=expand.grid(seqx,seqy);
   grid$Fx=0;
@@ -64,22 +77,27 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
     grid$Fy[i]=vec[[2]];
   }
 
-  Lx=xlim[[2]]-xlim[[1]];
-  Ly=ylim[[2]]-ylim[[1]];
-
+  #Get the norm of each vector
   grid$nrm=sqrt(grid$Fx^2+grid$Fy^2)
-  grid$nrm_scrunits=sqrt((grid$Fx/Lx)^2+(grid$Fy/Ly)^2)
-  maxrootlen_scrunits=max(sqrt(grid$nrm_scrunits));
 
+  #Get the length of each vector when plotted on the figure, in mm.
+  grid$nrm_mm=sqrt((grid$Fx/x_len*x_len_mm)^2+(grid$Fy/y_len*y_len_mm)^2)
+
+  #Get the longest vector length, in mm.
+  maxrootlen_mm=max(sqrt(grid$nrm_mm));
+
+  #Figure out how long we should draw each vector, in mm.
   if (normalize){
-    grid$displayLen_scrunits=radius_scrunits;
+    grid$targlen_mm=radius_mm;
   }
   else{
-    grid$displayLen_scrunits=radius_scrunits*sqrt(grid$nrm_scrunits)/maxrootlen_scrunits
+    grid$targlen_mm=radius_mm*sqrt(grid$nrm_mm)/maxrootlen_mm
   }
 
-  grid$toVar1=grid$Var1+ifelse(grid$nrm==0,0,grid$displayLen_scrunits/grid$nrm_scrunits)*grid$Fx
-  grid$toVar2=grid$Var2+ifelse(grid$nrm==0,0,grid$displayLen_scrunits/grid$nrm_scrunits)*grid$Fy
+  #Figure out the tip of each vector, scaling each vector to get it to show up the
+  #correct length in mm.
+  grid$toVar1=grid$Var1+ifelse(grid$nrm==0,0,grid$targlen_mm/grid$nrm_mm)*grid$Fx
+  grid$toVar2=grid$Var2+ifelse(grid$nrm==0,0,grid$targlen_mm/grid$nrm_mm)*grid$Fy
 
   #browser()
   if (!add){
@@ -89,7 +107,7 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
                                                     y0=grid$Var2,
                                                     x1=grid$toVar1,
                                                     y1=grid$toVar2,
-                                                    length=grid::unit(0.3*grid$displayLen,"npc"),
+                                                    length=grid::unit(0.3*grid$targlen_mm,"mm"),
                                                     col=grid$Color,lwd=lwd,
                                                     xlab=xlab,ylab=ylab,...)},
                           data=grid,
@@ -100,7 +118,10 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
   if (add){
     under=FALSE;
      return(plot + latticeExtra::layer(do.call(lattice::panel.arrows,
-                                               list(grid$Var1, grid$Var2,grid$toVar1,grid$toVar2,col=grid$Color,length=grid::unit(0.3*grid$displayLen,"npc"),
+                                               list(grid$Var1,
+                                                    grid$Var2,grid$toVar1,grid$toVar2,
+                                                    col=grid$Color,
+                                                    length=grid::unit(0.3*grid$targlen_mm,"mm"),
                                                     lwd=lwd)),data = as.list(environment()), under = under))
   }
 
