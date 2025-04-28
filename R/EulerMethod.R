@@ -134,6 +134,7 @@ Euler=function(dydt,tlim,ic,stepSize=(tlim[[2]]-tlim[[1]])/10,...){
 
   #now get the initial condition right.
 
+
   #Were the correct number of initial conditions given?
   if (length(ic)!=length(stateVarsInputOrder)){
     cat(paste("Error. You need to supply ",length(stateVarsInputOrder)," initial conditions. You supplied ",length(ic),"."))
@@ -204,9 +205,7 @@ Euler=function(dydt,tlim,ic,stepSize=(tlim[[2]]-tlim[[1]])/10,...){
 
   #At this point, dydtfunc should be ready to go.  It returns outputs in the same order as inputs, has the right number, etc.
   numSteps = ceiling((t_final-t0)/stepSize)
-  solution=data.frame(matrix(ncol=length(stateVarsInputOrder)+1,nrow=numSteps+1))
-  names(solution)=c("t",stateVarsInputOrder)
-
+  solution=matrix(ncol=length(stateVarsInputOrder)+1,nrow=numSteps+1)
 
   solution[1,]=c(t0,y0)
   yi=y0;
@@ -216,8 +215,10 @@ Euler=function(dydt,tlim,ic,stepSize=(tlim[[2]]-tlim[[1]])/10,...){
     ti=ti+stepSize;
     solution[i,]=c(ti,yi);
   }
-
-  #return(mosaicCalc::Iterate(function(t,y) c(t+stepSize,y+stepSize*dydtfunc(t,y)),x0=c(t0,y0),n=numSteps))
+  solution = as.data.frame(solution)
+  names(solution)=c("t",stateVarsInputOrder)
   return(solution)
 }
+
+
 
