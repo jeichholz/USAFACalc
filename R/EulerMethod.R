@@ -205,38 +205,19 @@ Euler=function(dydt,tlim,ic,stepSize=(tlim[[2]]-tlim[[1]])/10,...){
 
   #At this point, dydtfunc should be ready to go.  It returns outputs in the same order as inputs, has the right number, etc.
   numSteps = ceiling((t_final-t0)/stepSize)
+  solution=matrix(ncol=length(stateVarsInputOrder)+1,nrow=numSteps+1)
 
-  # Pre-allocate the data.table
-  solution = data.table::data.table(t = numeric(numSteps + 1))
-  for (var in stateVarsInputOrder) {
-    solution[, (var) := numeric(numSteps + 1)]
+  solution[1,]=c(t0,y0)
+  yi=y0;
+  ti=t0;
+  for (i in 2:(numSteps+1)){
+    yi=yi+stepSize*do.call(dydtfunc,args=as.list(c(t=ti,yi)))
+    ti=ti+stepSize;
+    solution[i,]=c(ti,yi);
   }
-
-  # Set the first row to initial conditions
-  solution[1, "t" := t0]
-  for (var in stateVarsInputOrder) {
-    solution[1, (var) := y0[var]]
-  }
-
-  # Create a list to hold values during each iteration (for performance)
-  yi = y0
-  ti = t0
-
-  # Use data.table's set() for fast row updates during iteration
-  for (i in 2:(numSteps + 1)) {
-    yi = yi + stepSize * do.call(dydtfunc, args = as.list(c(t = ti, yi)))
-    ti = ti + stepSize
-
-    # Update the row using data.table's set() - much faster than [i,]
-    data.table::set(solution, i, "t", ti)
-    for (j in seq_along(stateVarsInputOrder)) {
-      data.table::set(solution, i, stateVarsInputOrder[j], yi[j])
-    }
-  }
-
-  # Return the data.table
-  return(as.data.frame(solution))
-
+  solution = as.data.frame(solution)
+  names(solution)=c("t",stateVarsInputOrder)
+  return(solution)
 }
 
 
