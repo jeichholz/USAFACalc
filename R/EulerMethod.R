@@ -134,6 +134,7 @@ Euler=function(dydt,tlim,ic,stepSize=(tlim[[2]]-tlim[[1]])/10,...){
 
   #now get the initial condition right.
 
+
   #Were the correct number of initial conditions given?
   if (length(ic)!=length(stateVarsInputOrder)){
     cat(paste("Error. You need to supply ",length(stateVarsInputOrder)," initial conditions. You supplied ",length(ic),"."))
@@ -204,20 +205,39 @@ Euler=function(dydt,tlim,ic,stepSize=(tlim[[2]]-tlim[[1]])/10,...){
 
   #At this point, dydtfunc should be ready to go.  It returns outputs in the same order as inputs, has the right number, etc.
   numSteps = ceiling((t_final-t0)/stepSize)
-  solution=data.frame(matrix(ncol=length(stateVarsInputOrder)+1,nrow=numSteps+1))
-  names(solution)=c("t",stateVarsInputOrder)
 
-
-  solution[1,]=c(t0,y0)
-  yi=y0;
-  ti=t0;
-  for (i in 2:(numSteps+1)){
-    yi=yi+stepSize*do.call(dydtfunc,args=as.list(c(t=ti,yi)))
-    ti=ti+stepSize;
-    solution[i,]=c(ti,yi);
+  # Pre-allocate the data.table
+  solution = data.table::data.table(t = numeric(numSteps + 1))
+  for (var in stateVarsInputOrder) {
+    solution[, (var) := numeric(numSteps + 1)]
   }
 
-  #return(mosaicCalc::Iterate(function(t,y) c(t+stepSize,y+stepSize*dydtfunc(t,y)),x0=c(t0,y0),n=numSteps))
-  return(solution)
+  # Set the first row to initial conditions
+  solution[1, "t" := t0]
+  for (var in stateVarsInputOrder) {
+    solution[1, (var) := y0[var]]
+  }
+
+  # Create a list to hold values during each iteration (for performance)
+  yi = y0
+  ti = t0
+
+  # Use data.table's set() for fast row updates during iteration
+  for (i in 2:(numSteps + 1)) {
+    yi = yi + stepSize * do.call(dydtfunc, args = as.list(c(t = ti, yi)))
+    ti = ti + stepSize
+
+    # Update the row using data.table's set() - much faster than [i,]
+    data.table::set(solution, i, "t", ti)
+    for (j in seq_along(stateVarsInputOrder)) {
+      data.table::set(solution, i, stateVarsInputOrder[j], yi[j])
+    }
+  }
+
+  # Return the data.table
+  return(as.data.frame(solution))
+
 }
+
+
 
