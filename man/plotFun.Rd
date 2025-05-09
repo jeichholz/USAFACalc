@@ -25,7 +25,7 @@ plotFun(
   col = lattice::trellis.par.get("superpose.line")$col,
   col.regions = topo.colors,
   type = "l",
-  lwd = lattice::trellis.par.get("superpose.line")$lwd,
+  lwd = 2,
   lty = lattice::trellis.par.get("superpose.line")$lty,
   alpha = NULL,
   discontinuities = NULL,
