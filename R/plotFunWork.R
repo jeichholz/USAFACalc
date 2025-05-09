@@ -10,10 +10,15 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
                    xlab = NULL, zlab = NULL, filled = TRUE, levels = NULL,
                    nlevels = 10, labels = TRUE, surface = FALSE, groups = NULL,
                    col = lattice::trellis.par.get("superpose.line")$col, col.regions = topo.colors,
-                   type = "l", lwd = lattice::trellis.par.get("superpose.line")$lwd,
+                   type = "l", lwd = 2,
                    lty = lattice::trellis.par.get("superpose.line")$lty, alpha = NULL,
                    discontinuities = NULL, discontinuity = 1, interactive = mosaic::rstudio_is_available())
 {
+
+  #Joe changed the default option for lwd, because he thinks 2 looks better. The old default
+  #was
+  #lattice::trellis.par.get("superpose.line")$lwd
+
   if (is.function(object)) {
     formula <- f(x) ~ x
     formula[[2]] <- as.call(list(substitute(object), quote(x)))
