@@ -180,7 +180,7 @@ mathaxis.on=function(lwd=3,col="black",xat=0,yat=0,plot=lattice::trellis.last.ob
 #' place.vector(c(1,2),base=c(1,1))
 #'
 #' @export
-place.vector=function(offset,base=c(0,0),col="black",lwd=2,plot=lattice::trellis.last.object(),...){
+place.vector=function(offset,base=c(0,0),col="black",lwd=2,lty=1,plot=lattice::trellis.last.object(),...){
 
   #Get the length of the axes.
   xlim=plot$x.limits;
@@ -195,12 +195,12 @@ place.vector=function(offset,base=c(0,0),col="black",lwd=2,plot=lattice::trellis
   x_len_mm=plot_size_mm$x[[2]]-plot_size_mm$x[[1]]
   y_len_mm=plot_size_mm$y[[2]]-plot_size_mm$y[[1]]
 
-  vec_len_mm=sqrt((offset[[1]]/x_len*x_len_mm)^2+(offset[[2]]/y_len*y_len_mm)^2)
 
+  vec_len_mm=sqrt((offset[[1]]/x_len*x_len_mm)^2+(offset[[2]]/y_len*y_len_mm)^2)
   return(mosaic::ladd(lattice::panel.arrows(x0 = base[[1]], y0 = base[[2]],
                                             x1 = base[[1]]+offset[[1]], y1 = base[[2]]+offset[[2]],
-                                            length=grid::unit(0.15*vec_len_mm,"mm"),col = col, lwd = lwd, dots),
-                      data=list(base=base,offset=offset,col=col,lwd=lwd,vec_len_mm=vec_len_mm,dots=list(...)),plot=plot))
+                                            length=grid::unit(0.15*vec_len_mm,"mm"), col=col,lwd=lwd,lty=lty),
+                      data=list(base=base,offset=offset,vec_len_mm=vec_len_mm,dots=list(...),col=col,lwd=lwd,lty=lty),plot=plot))
 
 }
 
