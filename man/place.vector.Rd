@@ -9,6 +9,7 @@ place.vector(
   base = c(0, 0),
   col = "black",
   lwd = 2,
+  lty = 1,
   plot = lattice::trellis.last.object(),
   ...
 )
