@@ -1,0 +1,14 @@
+#' Median Home Price
+#'@description
+#'  A dataset containing the yearly median single-family home dollar value in the United States from as a function of the year from 1954 to 2025.
+#'
+#'
+#'@format A data frame with 72 observations and 2 variables:
+#' \describe{
+#'   \item{Year}{The year of observation}
+#'   \item{Price}{Median single-family house price, in dollars.}
+#'   ...
+#'}
+#'@source https://dqydj.com/historical-home-prices/. Accessed on July 15, 2025.
+#'
+"MedianHomePrice"
