@@ -5,7 +5,7 @@
 \alias{pwt_africa}
 \title{GDP Data for Africa}
 \format{
-A data frame with 15 rows and 2 variables:
+A data frame with 3500 observations and 7 variables:
 \describe{
   \item{country}{Country Name}
   \item{isocode}{ISO 3166-1 alpha-3 country code.}
