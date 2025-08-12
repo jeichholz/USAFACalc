@@ -5,7 +5,7 @@
 \alias{pwt_euro}
 \title{GDP Data for Europe}
 \format{
-A data frame with 15 rows and 2 variables:
+A data frame with 2730 observations and 7 variables:
 \describe{
   \item{country}{Country Name}
   \item{isocode}{ISO 3166-1 alpha-3 country code.}
