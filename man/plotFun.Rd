@@ -22,7 +22,7 @@ plotFun(
   labels = TRUE,
   surface = FALSE,
   groups = NULL,
-  col = lattice::trellis.par.get("superpose.line")$col,
+  col = NULL,
   col.regions = topo.colors,
   type = "l",
   lwd = 2,
@@ -30,6 +30,7 @@ plotFun(
   alpha = NULL,
   discontinuities = NULL,
   discontinuity = 1,
+  showcolorscale = FALSE,
   interactive = mosaic::rstudio_is_available()
 )
 }

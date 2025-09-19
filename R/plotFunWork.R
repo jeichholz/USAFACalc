@@ -9,15 +9,28 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
                    under = FALSE, xlim = NULL, ylim = NULL, npts = NULL, ylab = NULL,
                    xlab = NULL, zlab = NULL, filled = TRUE, levels = NULL,
                    nlevels = 10, labels = TRUE, surface = FALSE, groups = NULL,
-                   col = lattice::trellis.par.get("superpose.line")$col, col.regions = topo.colors,
+                   col = NULL, col.regions = topo.colors,
                    type = "l", lwd = 2,
                    lty = lattice::trellis.par.get("superpose.line")$lty, alpha = NULL,
-                   discontinuities = NULL, discontinuity = 1, interactive = mosaic::rstudio_is_available())
+                   discontinuities = NULL, discontinuity = 1, showcolorscale=FALSE,interactive = mosaic::rstudio_is_available())
 {
 
   #Joe changed the default option for lwd, because he thinks 2 looks better. The old default
   #was
   #lattice::trellis.par.get("superpose.line")$lwd
+
+  if (is.null(col)){
+    col=lattice::trellis.par.get("superpose.line")$col;
+    surfacecolorscheme='Viridis';
+  }
+  else{
+    if (col %in% colors()){
+      surfacecolorscheme=list(c(0,col),c(1,col))
+    }
+    else{
+      surfacecolorscheme=col;
+    }
+  }
 
   if (is.function(object)) {
     formula <- f(x) ~ x
@@ -206,27 +219,27 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
       }
       else {
         print((lattice::wireframe(height ~ Var1 + Var2, xlab = xlab,
-                                   ylab = ylab, zlab = list(zlab, rot = 90),
-                                   data = grid, groups = eval(substitute(groups),
-                                                              localData), drape = filled, shade = FALSE,
-                                   colorkey = FALSE, col.regions = zcolors, at = zcuts,
-                                   ...)))
+                                  ylab = ylab, zlab = list(zlab, rot = 90),
+                                  data = grid, groups = eval(substitute(groups),
+                                                             localData), drape = filled, shade = FALSE,
+                                  colorkey = FALSE, col.regions = zcolors, at = zcuts,
+                                  ...)))
       }
 
       #Create a plotly surface plot and print it, it looks better. By doing it last, if this is working, then the Viewer tab should be
       #the one that the student sees by default.
-      fig <- plotly::plot_ly(x=.xvals,y=.yvals,z=t(zvals), showscale=FALSE,
+      fig <- plotly::plot_ly(x=.xvals,y=.yvals,z=t(zvals), showscale=showcolorscale,
                              contours = list(
                                x=list(show=TRUE,highlight=FALSE,color="gray8",start=min(.xvals),end=max(.xvals),size=(max(.xvals)-min(.xvals))/20),
                                y=list(show=TRUE,highlight=FALSE,color="gray8",start=min(.yvals),end=max(.yvals),size=(max(.yvals)-min(.yvals))/20),
                                z = list(
                                  show=FALSE,
-                                 usecolormap=TRUE,
+                                 #usecolormap=TRUE,
                                  highlightcolor="black",project=list(z=TRUE)
                                )),
                              lighting=list(ambient=0.7,specular=0.5),hoverinfo="none") %>%
         plotly::layout(scene=list(xaxis=list(title=xlab),yaxis=list(title=ylab),zaxis=list(title=zlab),aspectmode='cube')) %>%
-        plotly::add_surface()
+        plotly::add_surface(colorscale=surfacecolorscheme)
       return(fig)
 
 
@@ -828,3 +841,4 @@ makeColorscheme <- function(col) {
   environment(result) <- e
   return(result)
 }
+

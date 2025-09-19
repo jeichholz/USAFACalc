@@ -92,7 +92,7 @@ plotFunFill=function(expression,bottom=0,xlim=c(0,1),col="red",alpha=0.5,add=FAL
 #' @param plot the figure to add the text to.
 #' @param zoom the factor by which to expand the text.
 #' @param tex if TRUE, try to interpret this string as TeX code.
-#' @param ... additional options that are passed to panel.text.
+#' @param ... additional options that are passed to the base `text` command. `?text` for options.
 #' @examples
 #' plotFunFill(x^2~x)
 #' place.text("x^2",0.5,0.8)
@@ -109,8 +109,8 @@ place.text=function(text,x,y,col="black",zoom=1,plot=lattice::trellis.last.objec
     text=latex2exp::TeX(text)
   }
   cex=zoom
-  return(mosaic::ladd(lattice::panel.text(x=x,y=y,labels=text,alpha=1,cex=cex,col=col),
-                      data=list(x=x,y=y,text=text,col=col,cex=cex),plot=plot))
+  return(mosaic::ladd(do.call(lattice::panel.text, args),
+                      data=list(args=c(list(text,x=x,y=y,col=col,cex=cex),dots)),plot=plot))
 }
 
 #' Turns on a grid on your plot.
@@ -162,8 +162,12 @@ grid.on=function(h=-1,v=-1,lwd=2,col="black",lty=2,plot=lattice::trellis.last.ob
 mathaxis.on=function(lwd=3,col="black",xat=0,yat=0,plot=lattice::trellis.last.object(),...){
   #browser()
   #browser()
-  A=mosaic::ladd(lattice::panel.abline(h=xat,col=col,lwd=lwd,dots),data=list(xat=xat,lwd=lwd,col=col,dots=list(...)),plot=plot)
-  A=mosaic::ladd(lattice::panel.abline(v=yat,lwd=lwd,col=col,dots),data=list(yat=yat,lwd=lwd,col=col,dots=list(...)),plot=A)
+  #A=mosaic::ladd(do.call(lattice::panel.abline,args),data=list(args=c(list(h=xat,col=col,lwd=lwd),list(...))),plot=plot)
+  A=mosaic::ladd(do.call(lattice::panel.abline,args),data=list(args=list(h=xat,col=col,lwd=lwd,...)),plot=plot)
+
+  #A=mosaic::ladd(do.call(lattice::panel.abline,args),data=list(args=c(list(v=yat,col=col,lwd=lwd),list(...))),plot=plot)
+  A=mosaic::ladd(do.call(lattice::panel.abline,args),data=list(args=list(v=yat,col=col,lwd=lwd,...)),plot=A)
+
   return(A)
 }
 
@@ -197,10 +201,10 @@ place.vector=function(offset,base=c(0,0),col="black",lwd=2,lty=1,plot=lattice::t
 
 
   vec_len_mm=sqrt((offset[[1]]/x_len*x_len_mm)^2+(offset[[2]]/y_len*y_len_mm)^2)
-  return(mosaic::ladd(lattice::panel.arrows(x0 = base[[1]], y0 = base[[2]],
+  return(mosaic::ladd(do.call(lattice::panel.arrows,args), data=list(args=list(x0 = base[[1]], y0 = base[[2]],
                                             x1 = base[[1]]+offset[[1]], y1 = base[[2]]+offset[[2]],
-                                            length=grid::unit(0.15*vec_len_mm,"mm"), col=col,lwd=lwd,lty=lty),
-                      data=list(base=base,offset=offset,vec_len_mm=vec_len_mm,dots=list(...),col=col,lwd=lwd,lty=lty),plot=plot))
+                                            length=grid::unit(0.15*vec_len_mm,"mm"), col=col,lwd=lwd,lty=lty,...)),
+                                            plot=plot))
 
 }
 
