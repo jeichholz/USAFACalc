@@ -4,6 +4,8 @@
 #' @param xlim the limits of the horizontal axis
 #' @param ylim the limits of the vertical axis
 #' @param N the number of horizontal and vertical rows of arrows to draw
+#' @param ylist the vertical grid points to use in the plot, if specified.
+#' @param xlist the horizontal grid points to use in the plot, if specified.
 #' @param normalize if true, then plot all vectors as unit length
 #' @param lwd arrow line width
 #' @param col arrow color
@@ -23,7 +25,7 @@
 #' plotVectorField(f(x,y)~x&y, xlim=c(-3,3),ylim=c(-4,4),col="green",lwd=3,add=TRUE)
 #' @export
 plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornflowerblue",lwd=2, normalize=FALSE,
-                           add=FALSE,plot = lattice::trellis.last.object(), ...){
+                           add=FALSE,xlist=NA, ylist=NA,plot = lattice::trellis.last.object(), ...){
 
   #expression should be an expression which takes as input two variables and returns a list of length 2 as output.
 
@@ -44,8 +46,19 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
   }
 
   # grid points
-  seqx = seq(xlim[[1]],xlim[[2]],length.out=N)
-  seqy = seq(ylim[[1]],ylim[[2]],length.out=N)
+  if (any(is.na(xlist))){
+    seqx = seq(xlim[[1]],xlim[[2]],length.out=N)
+  }
+  else{
+    seqx= xlist;
+  }
+  if (any(is.na(ylist))){
+    seqy = seq(ylim[[1]],ylim[[2]],length.out=N)
+  }
+  else{
+    seqy=ylist
+  }
+
 
   #radius=0.8*max(seqx[[2]]-seqx[[1]],seqy[[2]]-seqy[[1]])
 
@@ -162,12 +175,171 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
 #'  plotODEDirectionField(1/2*y+cos(t)~t&y,ics=c(-2,0,-1,2))
 #'
 #' @export
-plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),ics=NA, N=20,
+plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),ics=NA, N=20, ylist=NA,
                                col="black",lwd=2,add=FALSE,plot=lattice::trellis.last.object(),...){
 
   y0s=ics;
 
   allVars=all.vars(mosaic::rhs(expression))
+
+  lhsVars=all.vars(mosaic::lhs(expression))
+
+  if (length(lhsVars)>1){
+    nodesAt=seq(ylim[1],ylim[2],length.out=N)
+  }
+
+  if (length(lhsVars) ==1 && as.character(lhsVars[1]) != "t" & any(is.na(ylist))){
+    cat("Autonomous differential equation detected. Attemping smart vector placement.\n")
+
+    #Find fixed points.
+    fp=USAFACalc::findZeros(expression,xlim=ylim)
+
+    cat("Found fixed points:\n")
+    print(fp)
+
+    #Insert the top and bottom of the y-axis, if not already included.
+    if (nrow(fp)==0 || ylim[1]<fp[1,1]-1e-10){
+      fp=rbind(ylim[1],fp)
+    }
+    if (ylim[2]>fp[nrow(fp),1]+1e-10){
+      fp=rbind(fp,ylim[2])
+    }
+
+    deltax_nom=(ylim[2]-ylim[1])/(N-1);
+
+    nodeidx_of_fp=numeric(0);
+    #Get the index in the node list of the fixed points. NEED to watch out! This could give us
+    #two fixed points with the same index if we aren't careful.
+    for (i in 1:nrow(fp)){
+      if (i==1){
+        nodeidx_of_fp[i]=1
+      }
+      if(i==nrow(fp)){
+        nodeidx_of_fp[i]=N;
+      }
+      if (i>1 && i<nrow(fp)){
+        nodeidx_of_fp[i]=nodeidx_of_fp[i-1]+max(1,round((fp[i,1]-fp[i-1,])/deltax_nom))
+      }
+    }
+
+    if (any(nodeidx_of_fp > N) || any(duplicated(nodeidx_of_fp))){
+      cat("Error.  There are too many, oddly spaced, fixed points relative to the number of vectors.  Aborting. Try again with N=<a higher number>")
+      return()
+    }
+
+    #nodes listed in nodidx_of_fp are fixed.  Get the indices of the free nodes.
+    free_nodes=N-length(nodeidx_of_fp)
+    free_idxs=1:N;
+    free_idxs=free_idxs[!free_idxs %in% nodeidx_of_fp]
+
+    #build objective function.  Minimize the difference in lengths between
+    #successive intervals.  Must insert back in the list of "actual nodes" the "fixed nodes"
+    #that are not being optimized over.
+    objective=function(x){
+      actual_nodes=numeric(N);
+      actual_nodes[nodeidx_of_fp]=fp[,1];
+      actual_nodes[free_idxs]=unlist(x);
+      actual_nodes=unlist(actual_nodes);
+      deltax=diff(actual_nodes);
+      gammax=diff(deltax);
+      return(sum(gammax^2))
+    }
+
+    gradient=function(x){
+      actual_nodes=numeric(N);
+      actual_nodes[nodeidx_of_fp]=fp[,1];
+      actual_nodes[free_idxs]=unlist(x);
+      actual_nodes=unlist(actual_nodes);
+      gf=numeric(N);
+      for (j in 1:N){
+        if (j+2<=N){
+          gf[j]=gf[j]+2*(actual_nodes[j+2]-2*actual_nodes[j+1]+actual_nodes[j])
+        }
+        if (j+1<=N && j-1>=1){
+          gf[j]=gf[j]-4*(actual_nodes[j+1] -2*actual_nodes[j] +actual_nodes[j-1])
+        }
+        if (j-2>=1){
+          gf[j]=gf[j]+2*(actual_nodes[j]-2*actual_nodes[j-1]+actual_nodes[j-2])
+        }
+      }
+      gf=gf[-nodeidx_of_fp]
+      return(gf);
+    }
+
+    #Build constraints. Every free node has at least one constraint on it.
+    #Make this thing NxN, and then delete the constrained index rows and column, makes indexing better.
+    Amat=matrix(0,nrow=N,ncol=N);
+    bvec=matrix(0,nrow=N,ncol=1);
+    x0=matrix(0,nrow=N,ncol=1);
+    cidx=0;
+    for (i in 1:N){
+      #if node i is free, then we need x[i]>x[i-1].  If x[i-1] is free, then write x[i]-x[i-1]>0.
+      #if node i-1 is not free, then write x[i]>x[i-1]
+      if (i %in% free_idxs){
+        cidx=cidx+1;
+        if ((i-1) %in% free_idxs){
+          Amat[cidx,i]=1;
+          Amat[cidx,i-1]=-1;
+        }
+        else{
+          Amat[cidx,i]=1;
+          bvec[cidx,1]=fp[which(nodeidx_of_fp == (i-1)),1]
+        }
+        #Find the node index of a fixed point right before my index.
+        prev_fp_nodeidx=max(nodeidx_of_fp[nodeidx_of_fp<i])
+        next_fp_nodeidx=min(nodeidx_of_fp[nodeidx_of_fp>i])
+        prev_fp_coord=fp[which(nodeidx_of_fp == prev_fp_nodeidx),1];
+        next_fp_coord=fp[which(nodeidx_of_fp == next_fp_nodeidx),1]
+        width=next_fp_coord- prev_fp_coord;
+        x0[i]=prev_fp_coord+width*(i-prev_fp_nodeidx)/(next_fp_nodeidx-prev_fp_nodeidx);
+      }
+      #if node i is not free but node i-1 is, then if it is not node 1, we need
+      #x[i-1]<x[i] --> -x[i-1]>-x[i].  If node i is not free and node i-1 is not free,
+      #then there is no constraint to add here.
+      if (!i %in% free_idxs & i>1 & (i-1) %in% free_idxs){
+        cidx=cidx+1;
+        Amat[cidx,i-1]=-1;
+        bvec[cidx]=-fp[which(nodeidx_of_fp == i),1]
+      }
+
+    }
+
+
+    #Now delete the rows and columns that correspond to constrained nodes.
+    Amat=Amat[,-nodeidx_of_fp];
+    Amat=Amat[-(cidx+1:N),];
+    bvec=bvec[-(cidx+1:N),];
+    x0=x0[-nodeidx_of_fp,];
+
+    soln=constrOptim(x0,objective,gradient,Amat,bvec,control=list(maxit=1e5));
+
+    nodesat=numeric(N);
+    if (soln$convergence > 0){
+      cat("Warning.  Optimal nodes not found.  That was not expected.")
+      nodesat[free_idxs]=x0;
+      nodesat[nodeidx_of_fp]=fp[,1];
+    }
+    else{
+      nodesat=numeric(N);
+      nodesat[free_idxs]=soln$par;
+      nodesat[nodeidx_of_fp]=fp[,1];
+
+      nodesatnaive=numeric(N);
+      nodesatnaive[free_idxs]=x0;
+      nodesatnaive[nodeidx_of_fp]=fp[,1];
+      data=data.frame(nodes=nodesat,
+                      dx=c(NA,diff(nodesat)),
+                      ddx=c(NA,NA,diff(diff(nodesat))));
+
+      print(data)
+    }
+  }
+  else if (any(is.na(ylist))){
+    nodesat=seq(ylim[1],ylim[2],length.out=N)
+  }
+  else{
+    nodesat=ylist;
+  }
 
   if (!("t" %in% allVars)){
     exprstr=as.character(expression)
@@ -184,7 +356,7 @@ plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),ics=NA, N=20
   exprstr=as.character(expression)
   dydt1=stats::as.formula(paste("c(1,",exprstr[[2]],")~",exprstr[[3]],collapse=" "))
 
-  A=plotVectorField(dydt1,xlim=tlim,ylim=ylim,N=N,col=col,lwd=lwd,add=add,normalize=TRUE,plot=plot,...)
+  A=plotVectorField(dydt1,xlim=tlim,ylim=ylim,N=N,col=col,ylist=nodesat,lwd=lwd,add=add,normalize=TRUE,plot=plot,...)
 
   if (!any(is.na(y0s))){
     dydt=mosaicCore::makeFun(expression);
