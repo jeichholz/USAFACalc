@@ -191,6 +191,15 @@ plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),ics=NA, N=20
   if (length(lhsVars) ==1 && as.character(lhsVars[1]) != "t" & any(is.na(ylist))){
     cat("Autonomous differential equation detected. Attemping smart vector placement.\n")
 
+    if (length(allVars)>1){
+      exprstr=as.character(expression)
+      expression=stats::as.formula(paste(exprstr[[2]],"~",substring(exprstr[[3]],4) ,collapse=" "))
+      allVars=all.vars(mosaic::rhs(expression))
+    }
+
+
+
+
     #Find fixed points.
     fp=USAFACalc::findZeros(expression,xlim=ylim)
 
