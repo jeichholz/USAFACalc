@@ -30,7 +30,7 @@ place.text(
 
 \item{tex}{if TRUE, try to interpret this string as TeX code.}
 
-\item{...}{additional options that are passed to panel.text.}
+\item{...}{additional options that are passed to the base `text` command. `?text` for options.}
 }
 \description{
 Places text on a figure.  Supports some latex symbols, but backslashes must be double backslashes.
