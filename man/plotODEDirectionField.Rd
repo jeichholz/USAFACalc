@@ -10,6 +10,7 @@ plotODEDirectionField(
   ylim = c(-5, 5),
   ics = NA,
   N = 20,
+  ylist = NA,
   col = "black",
   lwd = 2,
   add = FALSE,
@@ -27,6 +28,8 @@ plotODEDirectionField(
 \item{ics}{If desired, a list of initial values from which to draw trajectories.}
 
 \item{N}{the number of horizontal and vertical rows of arrows to draw}
+
+\item{ylist}{the vertical grid points to use in the plot, if specified.}
 
 \item{col}{arrow color}
 

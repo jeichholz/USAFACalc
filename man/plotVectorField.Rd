@@ -14,6 +14,8 @@ plotVectorField(
   lwd = 2,
   normalize = FALSE,
   add = FALSE,
+  xlist = NA,
+  ylist = NA,
   plot = lattice::trellis.last.object(),
   ...
 )
@@ -34,6 +36,10 @@ plotVectorField(
 \item{normalize}{if true, then plot all vectors as unit length}
 
 \item{add}{T/F variable indicating whether this should be added to plot}
+
+\item{xlist}{the horizontal grid points to use in the plot, if specified.}
+
+\item{ylist}{the vertical grid points to use in the plot, if specified.}
 
 \item{plot}{the plot to which this should be added, default is the current plot.}
 
