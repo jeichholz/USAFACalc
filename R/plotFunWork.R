@@ -84,7 +84,7 @@ plotFun<-function (object, ..., plot = lattice::trellis.last.object(), add = NUL
                                                        discontinuities = discontinuities, filled = filled,
                                                        levels = levels, nlevels = nlevels, surface = surface,
                                                        col.regions = col.regions, type = type, alpha = alpha,
-                                                       col = col, lty = lty, lwd = lwd), dots)),
+                                                       col = col, lty = lty, lwd = lwd,xlim=xlim), dots)),
                                         data = as.list(environment()), ..., under = under))
     }
     rlang::check_installed("latticeExtra")
@@ -362,7 +362,7 @@ panel.usafacalc.plotFun1 <- function( ..f.., ...,
                                       surface=FALSE,
                                       alpha=NULL,
                                       discontinuity = NULL,
-                                      discontinuities = NULL) {
+                                      discontinuities = NULL,xlim=NULL,ylim=NULL) {
   dots <- list(...)
 
   if (is.function(..f..) ) ..f.. <- list(..f..)
@@ -400,11 +400,20 @@ panel.usafacalc.plotFun1 <- function( ..f.., ...,
       .xvals <- x
       .yvals <- y
     } else {
+      if (!is.null(xlim)){
+        xmin=base::min(xlim)
+        xmax=base::max(xlim)
+      }
+      else{
+        xmin=base::min(parent.xlim)
+        xmax=base::max(parent.xlim)
+      }
+
       # Evaluate the function on appropriate inputs to help figure out y limits.
       .xvals <-  if ('h' %in% type)
-        seq(base::min(parent.xlim), base::max(parent.xlim), length.out=npts)
+        seq(xmin, xmax, length.out=npts)
       else
-        mosaic::adapt_seq(base::min(parent.xlim), base::max(parent.xlim),
+        mosaic::adapt_seq(xmin, xmax,
                           f=function(xxqq){ .f.(xxqq) },
                           length.out=npts,
                           quiet=TRUE)

@@ -10,9 +10,12 @@ plotODEDirectionField(
   ylim = c(-5, 5),
   ics = NA,
   N = 20,
+  ylist = NA,
   col = "black",
   lwd = 2,
   add = FALSE,
+  force_nonautonomous = FALSE,
+  verbose = FALSE,
   plot = lattice::trellis.last.object(),
   ...
 )
@@ -28,11 +31,17 @@ plotODEDirectionField(
 
 \item{N}{the number of horizontal and vertical rows of arrows to draw}
 
+\item{ylist}{the vertical grid points to use in the plot, if specified.}
+
 \item{col}{arrow color}
 
 \item{lwd}{arrow line width}
 
 \item{add}{T/F variable indicating whether this should be added to plot}
+
+\item{force_nonautonomous}{Forces smart y-node placement to not run}
+
+\item{verbose}{determines whether smart y-node debug information will print}
 
 \item{plot}{the plot to which this should be added, default is the current plot.}
 
