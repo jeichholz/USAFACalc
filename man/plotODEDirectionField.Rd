@@ -14,6 +14,8 @@ plotODEDirectionField(
   col = "black",
   lwd = 2,
   add = FALSE,
+  force_nonautonomous = FALSE,
+  verbose = FALSE,
   plot = lattice::trellis.last.object(),
   ...
 )
@@ -36,6 +38,10 @@ plotODEDirectionField(
 \item{lwd}{arrow line width}
 
 \item{add}{T/F variable indicating whether this should be added to plot}
+
+\item{force_nonautonomous}{Forces smart y-node placement to not run}
+
+\item{verbose}{determines whether smart y-node debug information will print}
 
 \item{plot}{the plot to which this should be added, default is the current plot.}
 

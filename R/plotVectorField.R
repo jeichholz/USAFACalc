@@ -149,6 +149,8 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
 #' @param expression an expression giving the right hand side of the ODE, as a function of t and y, in that order.
 #' @param tlim the extent of the horizonatal axis
 #' @param ylim the extend of the vertical axis
+#' @param force_nonautonomous Forces smart y-node placement to not run
+#' @param verbose determines whether smart y-node debug information will print
 #' @inheritParams plotVectorField
 #' @param ics If desired, a list of initial values from which to draw trajectories.
 #' @examples
@@ -176,7 +178,7 @@ plotVectorField = function(expression,xlim=c(-5,5),ylim=c(-5,5),N=20,col="cornfl
 #'
 #' @export
 plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),ics=NA, N=20, ylist=NA,
-                               col="black",lwd=2,add=FALSE,plot=lattice::trellis.last.object(),...){
+                               col="black",lwd=2,add=FALSE,force_nonautonomous=FALSE,verbose=FALSE,plot=lattice::trellis.last.object(),...){
 
   y0s=ics;
 
@@ -184,27 +186,65 @@ plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),ics=NA, N=20
 
   lhsVars=all.vars(mosaic::lhs(expression))
 
-  if (length(lhsVars)>1){
+  # Insert t-dependence if it was omitted for convenience.
+  if (!("t" %in% allVars)){
+    exprstr=as.character(expression)
+    expression=stats::as.formula(paste(exprstr[[2]],"~t&",exprstr[[3]],collapse=" "))
+    allVars=all.vars(mosaic::rhs(expression))
+  }
+
+  if (length(allVars)!=2){
+    stop(paste("Vector function must take two variables as input.  You supplied ",as.character(length(allVars)),
+               "(",paste0(as.character(allVars),collapse=","),")"))
+  }
+
+
+  #Detect if this is an autonomous differential equation by evaluating the RHS of the ODE at many different time points.
+  #do this unless the user has turning it off.
+  ntpts=35;
+  nypts=35;
+  autonomous_detetion_tol=1e-7;
+
+  is_autonomous=FALSE;
+
+  if (!force_nonautonomous){
+    is_autonomous=TRUE;
+    f_fun=mosaic::makeFun(expression);
+    for (yprime in seq(ylim[1],ylim[2],length.out=nypts)){
+      fyt0=f_fun(tlim[1],yprime);
+      for (tprime in seq(tlim[1],tlim[2],length.out=ntpts)){
+        if (abs(f_fun(tprime,yprime)-fyt0)>autonomous_detetion_tol){
+          is_autonomous=FALSE;
+          break;
+        }
+      }
+      if (!is_autonomous){
+        break;
+      }
+    }
+  }
+
+  #If it is not autonomous, then the y-nodes are evenly spaced.
+  if (!is_autonomous){
     nodesAt=seq(ylim[1],ylim[2],length.out=N)
   }
 
-  if (length(lhsVars) ==1 && as.character(lhsVars[1]) != "t" & any(is.na(ylist))){
-    cat("Autonomous differential equation detected. Attemping smart vector placement.\n")
+  #If it is autonomous, then we try to do smart node placement to get evenly varying nodes that always hit the fixed points.
+  if (is_autonomous){
 
-    if (length(allVars)>1){
-      exprstr=as.character(expression)
-      expression=stats::as.formula(paste(exprstr[[2]],"~",substring(exprstr[[3]],4) ,collapse=" "))
-      allVars=all.vars(mosaic::rhs(expression))
+    if (verbose){
+      cat("Autonomous differential equation detected. Attemping smart vector placement.\n")
     }
+    #browser()
+    #Find fixed points. At this point expression has a t on the right-hand side.  It might include it on the left-hand side too, like y-t+t,
+    #which is stupid but legal.  So, create a function that evaluates expression at tlim[1].
+    ff_fun=mosaic::makeFun(f_fun(tlim[1],y)~y)
+    fp=USAFACalc::findZeros(ff_fun(y)~y,xlim=ylim)
 
-
-
-
-    #Find fixed points.
-    fp=USAFACalc::findZeros(expression,xlim=ylim)
-
-    cat("Found fixed points:\n")
-    print(fp)
+    if (verbose){
+      cat("Found fixed points:\n")
+      print(fp)
+    }
 
     #Insert the top and bottom of the y-axis, if not already included.
     if (nrow(fp)==0 || ylim[1]<fp[1,1]-1e-10){
@@ -217,6 +257,7 @@ plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),ics=NA, N=20
     deltax_nom=(ylim[2]-ylim[1])/(N-1);
 
     nodeidx_of_fp=numeric(0);
+
     #Get the index in the node list of the fixed points. NEED to watch out! This could give us
     #two fixed points with the same index if we aren't careful.
     for (i in 1:nrow(fp)){
@@ -339,8 +380,9 @@ plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),ics=NA, N=20
       data=data.frame(nodes=nodesat,
                       dx=c(NA,diff(nodesat)),
                       ddx=c(NA,NA,diff(diff(nodesat))));
-
-      print(data)
+      if (verbose){
+        print(data)
+      }
     }
   }
   else if (any(is.na(ylist))){
@@ -350,17 +392,7 @@ plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),ics=NA, N=20
     nodesat=ylist;
   }
 
-  if (!("t" %in% allVars)){
-    exprstr=as.character(expression)
-
-    expression=stats::as.formula(paste(exprstr[[2]],"~t&",exprstr[[3]],collapse=" "))
-    allVars=all.vars(mosaic::rhs(expression))
-  }
-
-  if (length(allVars)!=2){
-    stop(paste("Vector function must take two variables as input.  You supplied ",as.character(length(allVars)),
-               "(",paste0(as.character(allVars),collapse=","),")"))
-  }
+  #Finally done with smart node placement!
 
   exprstr=as.character(expression)
   dydt1=stats::as.formula(paste("c(1,",exprstr[[2]],")~",exprstr[[3]],collapse=" "))
