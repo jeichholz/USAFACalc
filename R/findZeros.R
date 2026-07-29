@@ -58,23 +58,37 @@ findZeros=function(expr, ..., xlim = c(near - within, near + within),
   #should the sympy method fail.
   dots=list(...)
 
+
   #Find all the variables in the expression.
   varNames=all.vars(mosaicCore::rhs(expr))
   #Ok, make a function which takes an expression and returns a corresponding function.
-  expression2function=function(expr,variables,...){
-    dots=list(...);
-    f=function(xvec){
-      mydots=dots;
-      for (i in 1:length(variables)){
-        mydots[[variables[[i]]]]=xvec[[i]];
-      }
-      return(eval(expr,envir=mydots,enclos=parent.frame()));
-    }
-    return(f);
+  #expression2function=function(expr,variables,...){
+  #  dots=list(...);
+  #  f=function(xvec){
+  #    mydots=dots;
+  #    for (i in 1:length(variables)){
+  #      mydots[[variables[[i]]]]=xvec[[i]];
+  #    }
+  #    return(eval(expr,envir=mydots,enclos=parent.frame()));
+  #  }
+  #  return(f);
+  #}
+
+  #We need to make a function in order to evaluate the expression at point.  We need this function to take vector input,
+  #rather than multiple inputs, and it needs to handle the original function being defined arbitrarily high up the
+  #call stack.  I think the best way to do this is get a function that takes multiple inputs but handles the call
+  #stack issue correctly using makeFun, and then wrap that to get vector inputs handled correctly.
+  ftmp=mosaic::makeFun(expr);
+
+  pfun=function(x){
+    names(x)<-varNames
+    do.call(ftmp,as.list(x))
   }
 
+  #browser()
+
   #Let's make a function for our expression(s):
-  pfun=expression2function(mosaicCore::lhs(expr),varNames)
+  #pfun=expression2function(mosaicCore::lhs(expr),varNames)
 
   #This will extract a numeric R value from a caracas number
   #There are two options.  First, convert the symbolic number to an exact string, something like sqrt(2)+3i, then have R evaluate that number.

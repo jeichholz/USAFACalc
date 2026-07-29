@@ -231,15 +231,15 @@ plotODEDirectionField=function(expression,tlim=c(0,10),ylim=c(-5,5),ics=NA, N=20
 
   #If it is autonomous, then we try to do smart node placement to get evenly varying nodes that always hit the fixed points.
   if (is_autonomous){
-
+    #browser()
     if (verbose){
       cat("Autonomous differential equation detected. Attemping smart vector placement.\n")
     }
     #browser()
     #Find fixed points. At this point expression has a t on the right-hand side.  It might include it on the left-hand side too, like y-t+t,
     #which is stupid but legal.  So, create a function that evaluates expression at tlim[1].
-    ff_fun=mosaic::makeFun(f_fun(tlim[1],y)~y)
-    fp=USAFACalc::findZeros(ff_fun(y)~y,xlim=ylim)
+    ff_fun=mosaic::makeFun(f_fun(z,y)~y,z=tlim[1])
+    fp=findZeros(ff_fun(y)~y,xlim=ylim)
 
     if (verbose){
       cat("Found fixed points:\n")
