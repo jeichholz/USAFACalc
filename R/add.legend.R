@@ -13,10 +13,14 @@
 #'
 #' @param ... Legend entries.
 #' @param space Legend position. Common values are `"right"`, `"top"`,
-#'   `"bottom"`, and `"left"`. Defaults to `"right"`.
-#' @param columns Number of legend columns. If `NULL`, the default is `1`
-#'   for legends on the left or right, and the number of legend entries for
-#'   legends on the top or bottom.
+#'   `"bottom"`, and `"left"`, which place the legend outside the plot
+#'   panel. Defaults to `"right"`. To place the legend inside the panel,
+#'   use one of `"inside-top-left"`, `"inside-top"`, `"inside-top-right"`,
+#'   `"inside-left"`, `"inside-center"`, `"inside-right"`,
+#'   `"inside-bottom-left"`, `"inside-bottom"`, or `"inside-bottom-right"`.
+#' @param columns Number of legend columns. If `NULL`, the default is `1`,
+#'   except for legends on the top/bottom or inside-top/inside-bottom,
+#'   where the default is the number of legend entries.
 #' @param background Background color for the legend. Defaults to `"white"`.
 #' @param default_lty Default line type. Defaults to `1`.
 #' @param default_lwd Default line width. Defaults to `1`.
@@ -57,19 +61,24 @@ add.legend <- function(
     default_pch = default_pch
   )
 
+  inside_position <- inside.legend.position(space)
+
   if (is.null(columns)) {
-    columns <- if (space %in% c("top", "bottom")) {
-      length(parsed$label)
+    multi_column <- if (is.null(inside_position)) {
+      space %in% c("top", "bottom")
     } else {
-      1
+      space %in% c("inside-top", "inside-bottom")
     }
+    columns <- if (multi_column) length(parsed$label) else 1
   }
 
-  key <- list(
-    space = space,
-    columns = columns,
-    background = background,
-    text = list(latex2exp::TeX(parsed$label))
+  key <- c(
+    if (is.null(inside_position)) list(space = space) else inside_position,
+    list(
+      columns = columns,
+      background = background,
+      text = list(latex2exp::TeX(parsed$label))
+    )
   )
 
   if (any(!is.na(parsed$lty) & parsed$lty != 0)) {
@@ -92,6 +101,31 @@ add.legend <- function(
   plot$legend <- NULL
 
   update(plot, key = key)
+}
+
+
+#' Translate a named inside-legend position into x/y/corner for lattice's key
+#'
+#' @param space Legend position, as passed to `add.legend()`.
+#' @param inset Distance from the panel edge, as a fraction of the panel size.
+#'
+#' @return A list with `x`, `y`, and `corner` if `space` names an inside
+#'   position, or `NULL` if `space` is an ordinary outside position (in which
+#'   case the caller should use `space` directly).
+inside.legend.position <- function(space, inset = 0.05) {
+  positions <- list(
+    "inside-top-left"     = list(x = inset,     y = 1 - inset, corner = c(0,   1)),
+    "inside-top"          = list(x = 0.5,       y = 1 - inset, corner = c(0.5, 1)),
+    "inside-top-right"    = list(x = 1 - inset, y = 1 - inset, corner = c(1,   1)),
+    "inside-left"         = list(x = inset,     y = 0.5,       corner = c(0,   0.5)),
+    "inside-center"       = list(x = 0.5,       y = 0.5,       corner = c(0.5, 0.5)),
+    "inside-right"        = list(x = 1 - inset, y = 0.5,       corner = c(1,   0.5)),
+    "inside-bottom-left"  = list(x = inset,     y = inset,     corner = c(0,   0)),
+    "inside-bottom"       = list(x = 0.5,       y = inset,     corner = c(0.5, 0)),
+    "inside-bottom-right" = list(x = 1 - inset, y = inset,     corner = c(1,   0))
+  )
+
+  positions[[space]]
 }
 
 

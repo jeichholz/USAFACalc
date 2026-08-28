@@ -19,11 +19,15 @@ add.legend(
 \item{...}{Legend entries.}
 
 \item{space}{Legend position. Common values are `"right"`, `"top"`,
-`"bottom"`, and `"left"`. Defaults to `"right"`.}
+`"bottom"`, and `"left"`, which place the legend outside the plot
+panel. Defaults to `"right"`. To place the legend inside the panel,
+use one of `"inside-top-left"`, `"inside-top"`, `"inside-top-right"`,
+`"inside-left"`, `"inside-center"`, `"inside-right"`,
+`"inside-bottom-left"`, `"inside-bottom"`, or `"inside-bottom-right"`.}
 
-\item{columns}{Number of legend columns. If `NULL`, the default is `1`
-for legends on the left or right, and the number of legend entries for
-legends on the top or bottom.}
+\item{columns}{Number of legend columns. If `NULL`, the default is `1`,
+except for legends on the top/bottom or inside-top/inside-bottom,
+where the default is the number of legend entries.}
 
 \item{background}{Background color for the legend. Defaults to `"white"`.}
 
